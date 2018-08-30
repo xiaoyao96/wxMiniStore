@@ -1,0 +1,8 @@
+
+<view style='margin-top: 200rpx;text-align:left;line-height:60rpx;'><text>{{$state.msg}}</text></view>
+<view style='margin-top: 50rpx;' wx:if="{{$state.finish}}">
+  <icon type='success' /> 已完成所有阅读
+</view>
+<button bindtap='inDetail'>
+  开始
+</button>

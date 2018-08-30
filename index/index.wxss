@@ -1,0 +1,14 @@
+page {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+}
+view{
+  padding: 0 30rpx;
+}
+
+button{
+  margin-top: 80rpx;
+  width: 60vw;
+}

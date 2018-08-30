@@ -1,0 +1,6 @@
+<!--component/text.wxml-->
+<view style='color:red;'>
+  <view>我是一个子组件，这是全局的用户信息：</view>
+  <view>我叫{{$state.user.name}}</view>
+  <view>现在是{{$state.user.time}}</view>
+</view>
