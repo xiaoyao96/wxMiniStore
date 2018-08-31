@@ -48,15 +48,25 @@ function Store(options) {
   };
 }
 
-Store.prototype.setState = function() {
+Store.prototype.setState = function(arg, callback) {
+  if(typeof arg != 'object' && arg !== null){
+    throw new Error('第一个参数必须为object对象')
+  }
   let _this = this;
+  let pros = [];
   _this.$r.forEach(item => {
-    for (let key in arguments[0]){
-      item.setData({
-        ['$state.' + key]: arguments[0][key]
-      })
+    for (let key in arg){
+      let p = new Promise(resolve => {
+        item.setData({
+          ['$state.' + key]: arg[key]
+        }, resolve)
+      });
+      pros.push(p);
     }
   });
+  Promise.all(pros).then(_ => {
+    typeof callback === 'function' && callback();
+  })
   _this.$state = _this.$r[0].data.$state
 }
 
