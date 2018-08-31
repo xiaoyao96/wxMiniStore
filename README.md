@@ -74,7 +74,7 @@ Page({
 
 ### Store.prototype.setState(Object data, Function callback)
 用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。
-*提示：页面中应避免使用this.setData({$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。
+*提示：页面中应避免使用this.setData({$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
 ### store.$state : Object
 该对象为实例.$state， 返回的是全局状态（引用）。应避免直接操作修改它。
