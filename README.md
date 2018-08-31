@@ -50,7 +50,7 @@ App({
 ```
 
 ### 5.如何修改状态
-js中使用app中的store来进行操作状态，`getApp().store.setState(Object)`用法与页面中的`this.setData(Object)`完全一致（由于继承关系）。
+js中使用app中的store来进行操作状态，。具体参见下面api说明。
 ```js
 const app = getApp()
 Page({
