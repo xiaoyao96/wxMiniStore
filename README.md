@@ -1,13 +1,14 @@
 # wxMiniStore
 
-一个基于微信小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中使用。
+一个基于微信小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中查看。
 
 ## 开始
-### 1. 引入store
+### 1. 引入
+引入util下的store.js
 ```js
 const Store = require('util/store.js');
 ```
-### 2. 实例化一个Store，且允许初始化一个全局状态
+### 2. 实例化
 Store 允许传一个参数，类型为Object，意为初始化一个全局状态，全局状态都将存入store.$state中。
 ```js 
 let store = new Store({
@@ -21,6 +22,7 @@ let store = new Store({
 console.log(store.$state.user.name); //李四
 ```
 ### 3.在App中注入store
+这么做是为了在其他页面中使用store。
 ```js
 App({
   onLaunch: function () {
@@ -50,7 +52,7 @@ App({
 ```
 
 ### 5.如何修改状态
-js中使用app中的store来进行操作状态，`getApp().store.setState(Object)`用法与页面中的`this.setData(Object)`完全一致（由于继承关系）。
+js中使用app中的store来进行操作状态。具体参见下面api说明。
 ```js
 const app = getApp()
 Page({
@@ -74,7 +76,6 @@ Page({
 
 ### Store.prototype.setState(Object data, Function callback)
 用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。
-
 *提示：页面中应避免使用this.setData({$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
 ### store.$state : Object
