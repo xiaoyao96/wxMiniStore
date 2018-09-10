@@ -75,7 +75,7 @@ Page({
 参数initState，为初始全局状态，可不传。
 
 ### Store.prototype.setState(Object data, Function callback)
-用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。
+用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时），渲染为异步。
 *提示：页面中应避免使用this.setData({$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
 ### store.$state : Object
@@ -87,4 +87,5 @@ Page({
 ## 总结
 适用于全局的状态大范围同步变动，如用户信息，临时的购物车信息，等等应用场景。原理实现上，源码很清晰，后期慢慢优化，欢迎指正。
 
-
+## 更新日志
+\[2018.9.10\] 修复在页面未加载完时，调用setState报错。
