@@ -82,7 +82,7 @@ Store.prototype.setState = function(arg, callback) {
     Promise.all(pros).then(_ => {
       typeof callback === 'function' && callback();
     })
-    _this.$state = _this.$r[0].data.$state    
+    _this.$state = { ..._this.$state, ..._this.$r[0].data.$state };   
   }else{
      event = function(){
        _this.$r.forEach(item => {
@@ -98,7 +98,7 @@ Store.prototype.setState = function(arg, callback) {
        Promise.all(pros).then(_ => {
          typeof callback === 'function' && callback();
        })
-       _this.$state = _this.$r[0].data.$state;
+       _this.$state = { ..._this.$state, ..._this.$r[0].data.$state };
      }
   }
 }
