@@ -2,7 +2,10 @@
  * @author 逍遥
  * @date 2018.8.30
  */
+
+let event = null;
 function Store(options) {
+  
   this.$r = []; //所有实例
   this.$state = {}; //状态
 
@@ -13,12 +16,18 @@ function Store(options) {
 
   //重构Component
   Component = function() {
+    //全局注入
     let attached = arguments[0].attached;
     arguments[0].attached = function() {
       _this.$r.push(this);
-      this.setData({
-        $state: _this.$state
-      })
+      if (event) {
+        event();
+        event = null;
+      } else {
+        this.setData({
+          $state: _this.$state
+        })
+      }
       attached && attached.bind(this)(...arguments);
     }
     let detached = arguments[0].detached;
@@ -34,9 +43,14 @@ function Store(options) {
     let onLoad = arguments[0].onLoad;
     arguments[0].onLoad = function() {
       _this.$r.push(this);
-      this.setData({
-        $state: _this.$state
-      })
+      if(event){
+        event();
+        event = null;
+      }else{
+        this.setData({
+          $state: _this.$state
+        })
+      }
       onLoad && onLoad.bind(this)(...arguments);
     }
     let onUnload = arguments[0].onUnload;
@@ -54,20 +68,39 @@ Store.prototype.setState = function(arg, callback) {
   }
   let _this = this;
   let pros = [];
-  _this.$r.forEach(item => {
-    for (let key in arg){
-      let p = new Promise(resolve => {
-        item.setData({
-          ['$state.' + key]: arg[key]
-        }, resolve)
-      });
-      pros.push(p);
-    }
-  });
-  Promise.all(pros).then(_ => {
-    typeof callback === 'function' && callback();
-  })
-  _this.$state = _this.$r[0].data.$state
+  if(_this.$r.length > 0){
+    _this.$r.forEach(item => {
+      for (let key in arg) {
+        let p = new Promise(resolve => {
+          item.setData({
+            ['$state.' + key]: arg[key]
+          }, resolve)
+        });
+        pros.push(p);
+      }
+    });
+    Promise.all(pros).then(_ => {
+      typeof callback === 'function' && callback();
+    })
+    _this.$state = _this.$r[0].data.$state    
+  }else{
+     event = function(){
+       _this.$r.forEach(item => {
+         for (let key in arg) {
+           let p = new Promise(resolve => {
+             item.setData({
+               ['$state.' + key]: arg[key]
+             }, resolve)
+           });
+           pros.push(p);
+         }
+       });
+       Promise.all(pros).then(_ => {
+         typeof callback === 'function' && callback();
+       })
+       _this.$state = _this.$r[0].data.$state;
+     }
+  }
 }
 
 module.exports = Store
