@@ -16,14 +16,19 @@ function Store(options) {
 
   //重构Component
   Component = function() {
-    //全局注入
     let attached = arguments[0].attached;
+    arguments[0].data = {
+      ...arguments[0].data,
+      $state: {
+        ..._this.$state
+      }
+    }
     arguments[0].attached = function() {
       _this.$r.push(this);
       if (event) {
         event();
         event = null;
-      } else {
+      }else{
         this.setData({
           $state: _this.$state
         })
@@ -40,6 +45,13 @@ function Store(options) {
 
   //重构Page
   Page = function() {
+    console.log(_this.$state)
+    arguments[0].data = {
+      ...arguments[0].data,
+      $state: {
+        ..._this.$state
+      }
+    }
     let onLoad = arguments[0].onLoad;
     arguments[0].onLoad = function() {
       _this.$r.push(this);
@@ -82,7 +94,7 @@ Store.prototype.setState = function(arg, callback) {
     Promise.all(pros).then(_ => {
       typeof callback === 'function' && callback();
     })
-    _this.$state = { ..._this.$state, ..._this.$r[0].data.$state };   
+    _this.$state = { ..._this.$state, ..._this.$r[0].data.$state };  
   }else{
      event = function(){
        _this.$r.forEach(item => {
@@ -98,8 +110,8 @@ Store.prototype.setState = function(arg, callback) {
        Promise.all(pros).then(_ => {
          typeof callback === 'function' && callback();
        })
-       _this.$state = { ..._this.$state, ..._this.$r[0].data.$state };
-     }
+       _this.$state = {..._this.$state, ..._this.$r[0].data.$state};
+     } 
   }
 }
 
