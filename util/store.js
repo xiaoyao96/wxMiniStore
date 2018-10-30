@@ -83,7 +83,6 @@ function Store(options = {}) {
     }
     let onLoad = arg.onLoad;
     arg.onLoad = function() {
-      App.mta.Page.init()
       _this.$r.push(this);
       if (event) {
         event();
