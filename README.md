@@ -2,9 +2,9 @@
 
 一个基于微信小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中查看。
 ## 更新日志
-\[2018.10.30\] 拓展新增methods全局方法，大幅优化setState性能。更新需调整Store结构，请阅读Store对象参数详情。
-\[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相对，但$state.key 完全相等。
-\[2018.9.10\] 修复在页面未加载完时，调用setState报错。
+\[2018.10.30\] 拓展新增methods全局方法，大幅优化setState性能。更新需调整Store结构，请阅读Store对象参数详情。  
+\[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相对，但$state.key 完全相等。  
+\[2018.9.10\] 修复在页面未加载完时，调用setState报错。  
 
 
 ## 开始
@@ -106,7 +106,7 @@ Page({
   ```
   直接使用方法名即可使用。
   ### 3.说明
-  全局方法可以完全替代wxs，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。
+  全局方法可以完全替代wxs，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。  
   考虑到后期的全局方法可能很多，可以把整套store单独写入一个js中，通过require引入。如：
   ``` js
 	// mystore.js中
@@ -129,12 +129,14 @@ Page({
 
 ## api
 这里列举了所有涉及到Store的属性与方法。
-### new Store(initState: Object)
+### new Store(options: Object) *已更新
 该函数使用new关键字返回一个Store类型的实例。
-参数initState，为初始全局状态，可不传。
+参数options，为配置参数，
+options.state 为初始全局状态。
+options.methods 为全局方法。
 
 ### Store.prototype.setState(Object data, Function callback)
-用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时），渲染为异步。
+用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时完成），渲染为异步。
 *提示：页面中应避免使用this.setData({$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
 ### store.$state : Object
