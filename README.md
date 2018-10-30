@@ -6,14 +6,21 @@
 \[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相对，但$state.key 完全相等。  
 \[2018.9.10\] 修复在页面未加载完时，调用setState报错。  
 
+###导航
+* [开始](#start)  
+* [全局状态](#initState)
+* [全局方法](#initF)
+* [Api说明](#api)
+* [总结及建议](#end)
 
-## 开始
+============================================
+## <div id="start"></div>开始
 ### 1. 引入
 引入util下的store.js
 ```js
 const Store = require('util/store.js');
 ```
-### 2. 实例化
+### <div id="initState"></div>2. 实例化一个全局状态
 Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
 ```js 
 let store = new Store({
@@ -71,7 +78,8 @@ Page({
 });
 
 ```
-## 全局方法 methods
+============================================
+## <div id="initF"></div>全局方法 methods
   由于官方wxs与js差异明显，且无法调试wxs的错误。所以新增了methods。同样支持所有页面组件调用，且为js
 
   ### 1. 创建一个全局方法
@@ -112,8 +120,8 @@ Page({
  
   
 
-
-## api
+============================================
+## <div id="api"></div>api
 这里列举了所有涉及到Store的属性与方法。
 ### new Store(options: Object) *已更新
 该函数使用new关键字返回一个Store类型的实例。
@@ -129,9 +137,10 @@ options.methods 为全局方法。
 该对象为实例.$state， 返回的是全局状态（部分引用）。应避免直接操作修改它。
 
 ### store.$r : Object
-该对象为所有页面或组件的实例。
+该对象为所有页面或组件的实例。  
 
-## 总结
+============================================
+## <div id="end"></div>总结及建议
 考虑到后期的app.js内store不直观，可以把整套store单独写入一个js中，通过require引入。如：
   ``` js
 	// mystore.js中
