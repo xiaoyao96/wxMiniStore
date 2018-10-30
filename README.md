@@ -99,7 +99,7 @@ Page({
   
   ### 2.使用全局方法
   ```html
-	<view bindtap="toUpper" data-url="/index/index">
+	<view bindtap="goAnyWhere" data-url="/index/index">
 		{{toUpper('abc')}}
 	</view>
 	
@@ -107,23 +107,9 @@ Page({
   直接使用方法名即可使用。
   ### 3.说明
   全局方法可以完全替代wxs，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。  
-  考虑到后期的全局方法可能很多，可以把整套store单独写入一个js中，通过require引入。如：
-  ``` js
-	// mystore.js中
-	module.exports = new Store({
-		state: {...},
-		methods: {...}
-	
-	})
-//=========================
-	// app.js中
-	let store = require('store/mystore.js')
-	App({
-	 store
-	})
-  ```
   
   
+ 
   
 
 
@@ -146,6 +132,20 @@ options.methods 为全局方法。
 该对象为所有页面或组件的实例。
 
 ## 总结
-适用于全局的状态大范围同步变动，如用户信息，临时的购物车信息，等等应用场景。原理实现上，源码很清晰，后期慢慢优化，欢迎指正。
+考虑到后期的app.js内store不直观，可以把整套store单独写入一个js中，通过require引入。如：
+  ``` js
+	// mystore.js中
+	const Store = require('../util/store.js');
+	module.exports = new Store({
+		state: {...},
+		methods: {...}
+	})
+//=========================
+	// app.js中
+	let store = require('store/mystore.js')
+	App({
+	 store
+	})
+  ```
 
-
+此适用于全局的状态大范围同步变动，如用户信息，临时的购物车信息，等等应用场景。原理实现上，源码很清晰，后期慢慢优化，欢迎指正。
