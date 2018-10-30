@@ -1,6 +1,11 @@
 # wxMiniStore
 
 一个基于微信小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中查看。
+## 更新日志
+\[2018.10.30\] 拓展新增methods全局方法，大幅优化setState性能。更新需调整Store结构，请阅读Store对象参数详情。
+\[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相对，但$state.key 完全相等。
+\[2018.9.10\] 修复在页面未加载完时，调用setState报错。
+
 
 ## 开始
 ### 1. 引入
@@ -9,17 +14,15 @@
 const Store = require('util/store.js');
 ```
 ### 2. 实例化
-Store 允许传一个参数，类型为Object，意为初始化一个全局状态，全局状态都将存入store.$state中。
+Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
 ```js 
 let store = new Store({
   //。
-  msg: '这是一个全局状态',
-  user: {
-    name: '李四',
-    time: new Date()
+  state: {
+    msg: '这是一个全局状态'
   }
 })
-console.log(store.$state.user.name); //李四
+console.log(store.$state.msg); //这是一个全局状态
 ```
 ### 3.在App中注入store
 这么做是为了在其他页面中使用store。
@@ -68,6 +71,62 @@ Page({
 });
 
 ```
+## 全局方法 methods
+  由于官方wxs与js差异明显，且无法调试wxs的错误。所以新增了methods。同样支持所有页面组件调用，且为js
+
+  ### 1. 创建一个全局方法
+  在原有基础上，新增一个methods对象，写入你的全局方法：
+  ```js
+	let store = new Store({
+	  //。
+	  state: {
+		msg: '这是一个全局状态'
+	  },
+	  methods: {
+		toUpper(str){
+			return str.toLocaleUpperCase();
+		},
+		goAnyWhere(e){
+		
+			wx.navigateTo({
+				url: e.currentTarget.dataset.url
+			})
+		}
+	  }
+	})
+  ```
+  这里创建了两个全局方法，一个是封装的转化大小写toUpper，一个是封装的跳转 goAnyWhere。
+  
+  ### 2.使用全局方法
+  ```html
+	<view bindtap="toUpper" data-url="/index/index">
+		{{toUpper('abc')}}
+	</view>
+	
+  ```
+  直接使用方法名即可使用。
+  ### 3.说明
+  全局方法可以完全替代wxs，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。
+  考虑到后期的全局方法可能很多，可以把整套store单独写入一个js中，通过require引入。如：
+  ``` js
+	// mystore.js中
+	module.exports = new Store({
+		state: {...},
+		methods: {...}
+	
+	})
+//=========================
+	// app.js中
+	let store = require('store/mystore.js')
+	App({
+	 store
+	})
+  ```
+  
+  
+  
+
+
 ## api
 这里列举了所有涉及到Store的属性与方法。
 ### new Store(initState: Object)
@@ -87,7 +146,4 @@ Page({
 ## 总结
 适用于全局的状态大范围同步变动，如用户信息，临时的购物车信息，等等应用场景。原理实现上，源码很清晰，后期慢慢优化，欢迎指正。
 
-## 更新日志
-\[2018.9.10\] 修复在页面未加载完时，调用setState报错。
 
-\[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相对，但$state.key 完全相等。
