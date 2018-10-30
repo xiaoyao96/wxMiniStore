@@ -14,13 +14,13 @@
 * [总结及建议](#end)
 
 
-## <div id="start"></div>开始
+## <div id="start">开始</div>
 ### 1. 引入
 引入util下的store.js
 ```js
 const Store = require('util/store.js');
 ```
-### <div id="initState"></div>2. 实例化一个全局状态
+### <div id="initState">2. 实例化一个全局状态</div>
 Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
 ```js 
 let store = new Store({
@@ -79,7 +79,7 @@ Page({
 
 ```
 
-## <div id="initF"></div>全局方法 methods
+## <div id="initF">全局方法 methods</div>
   由于官方wxs与js差异明显，且无法调试wxs的错误。所以新增了methods。同样支持所有页面组件调用，且为js
 
   ### 1. 创建一个全局方法
@@ -121,7 +121,7 @@ Page({
   
 
 
-## <div id="api"></div>api
+## <div id="api">api</div>
 这里列举了所有涉及到Store的属性与方法。
 ### new Store(options: Object) *已更新
 该函数使用new关键字返回一个Store类型的实例。
@@ -131,16 +131,16 @@ options.methods 为全局方法。
 
 ### Store.prototype.setState(Object data, Function callback)
 用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时完成），渲染为异步。
-*提示：页面中应避免使用this.setData({$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
+*提示：页面中应避免使用this.setData({\$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
-### store.$state : Object
+### store.\$state : Object
 该对象为实例.$state， 返回的是全局状态（部分引用）。应避免直接操作修改它。
 
 ### store.$r : Object
 该对象为所有页面或组件的实例。  
 
 
-## <div id="end"></div>总结及建议
+## <div id="end">总结及建议</div>
 考虑到后期的app.js内store不直观，可以把整套store单独写入一个js中，通过require引入。如：
   ``` js
 	// mystore.js中
