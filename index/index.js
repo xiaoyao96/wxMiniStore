@@ -7,9 +7,7 @@ Page({
   onLoad: function () {
     
   },
-  inDetail(){
-    wx.navigateTo({
-      url: '/detail/detail',
-    })
+  toUpper(str) {
+    return 1
   }
 })

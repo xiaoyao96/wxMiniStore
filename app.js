@@ -13,6 +13,13 @@ let store = new Store({
       name: '李四',
       time: new Date()
     }
+  },
+  methods: {
+    goAnyWhere(e) {
+      wx.navigateTo({
+        url: e.currentTarget.dataset.url
+      })
+    }
   }
 })
 App({

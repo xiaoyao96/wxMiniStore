@@ -21,6 +21,7 @@ function Store(options = {}) {
   const [_this, OriginCom, OriginPage] = [this, Component, Page];
   const behavior = options.behavior;
   const methods = options.methods;
+  console.log(methods)
   //重构Component
   Component = function(arg = {}) {
     let attached = arg.attached;

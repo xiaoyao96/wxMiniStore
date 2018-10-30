@@ -80,7 +80,7 @@ Page({
 ```
 
 ## <div id="f">全局方法 methods</div>
-  由于官方wxs与js差异明显，且无法调试wxs的错误。所以新增了methods。同样支持所有页面组件调用，且为js
+  新增methods，全局可使用。（注：不可当wxs使用）
 
   ### 1. 创建一个全局方法
   在原有基础上，新增一个methods对象，写入你的全局方法：
@@ -91,9 +91,6 @@ Page({
 		msg: '这是一个全局状态'
 	  },
 	  methods: {
-		toUpper(str){
-			return str.toLocaleUpperCase();
-		},
 		goAnyWhere(e){
 		
 			wx.navigateTo({
@@ -103,18 +100,18 @@ Page({
 	  }
 	})
   ```
-  这里创建了两个全局方法，一个是封装的转化大小写toUpper，一个是封装的跳转 goAnyWhere。
+  这里创建了一个全局方法封装的跳转 goAnyWhere。
   
   ### 2.使用全局方法
   ```html
 	<view bindtap="goAnyWhere" data-url="/index/index">
-		{{toUpper('abc')}}
+		
 	</view>
 	
   ```
   直接使用方法名即可使用。
   ### 3.说明
-  全局方法可以完全替代wxs，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。  
+  全局方法可以封装一些常用方法，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。  
   
   
  

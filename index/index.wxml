@@ -3,6 +3,6 @@
 <view style='margin-top: 50rpx;' wx:if="{{$state.finish}}">
   <icon type='success' /> 已完成所有阅读
 </view>
-<button bindtap='inDetail'>
+<button bindtap='goAnyWhere' data-url='/detail/detail'>
   开始
 </button>
