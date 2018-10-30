@@ -8,8 +8,8 @@
 
 ### 导航
 * [开始](#start)  
-* [全局状态](#initState)
-* [全局方法](#initF)
+* [全局状态](#state)
+* [全局方法](#f)
 * [Api说明](#api)
 * [总结及建议](#end)
 
@@ -20,7 +20,7 @@
 ```js
 const Store = require('util/store.js');
 ```
-### <div id="initState">2. 实例化一个全局状态</div>
+### <div id="state">2. 实例化一个全局状态</div>
 Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
 ```js 
 let store = new Store({
@@ -79,7 +79,7 @@ Page({
 
 ```
 
-## <div id="initF">全局方法 methods</div>
+## <div id="f">全局方法 methods</div>
   由于官方wxs与js差异明显，且无法调试wxs的错误。所以新增了methods。同样支持所有页面组件调用，且为js
 
   ### 1. 创建一个全局方法
