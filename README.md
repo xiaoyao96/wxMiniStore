@@ -2,14 +2,16 @@
 
 一个基于微信小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中查看。
 ## 更新日志
-\[2018.10.30\] 拓展新增methods全局方法，大幅优化setState性能。更新需调整Store结构，请阅读Store对象参数详情。  
-\[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相对，但$state.key 完全相等。  
+\[2018.10.31\] 拓展新增[周期监听 pageLisener字段](#pageLisener)，可监听所有页面的所有生命周期事件。
+\[2018.10.30\] 拓展新增功能[全局方法 methods字段](#f)，大幅优化setState性能。更新前需调整Store结构，请阅读[Store对象参数详情](#api)。  
+\[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相等，但$state.key 完全相等。  
 \[2018.9.10\] 修复在页面未加载完时，调用setState报错。  
 
 ### 导航
 * [开始](#start)  
 * [全局状态](#state)
 * [全局方法](#f)
+* [全局页面周期](#pageLisener)
 * [Api说明](#api)
 * [总结及建议](#end)
 
@@ -20,7 +22,7 @@
 ```js
 const Store = require('util/store.js');
 ```
-### <div id="state">2. 实例化一个全局状态</div>
+### <div id="state">2. 实例化一个全局状态 state</div>
 Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
 ```js 
 let store = new Store({
@@ -80,42 +82,99 @@ Page({
 ```
 
 ## <div id="f">全局方法 methods</div>
-  新增methods，全局可使用。（注：不可当wxs使用）
-
-  ### 1. 创建一个全局方法
-  在原有基础上，新增一个methods对象，写入你的全局方法：
+  新增methods，全局可使用。
+  适用于各个wxml中的交互事件(bindtap等), 你可以封装一些常用的交互事件，如 行为埋点，类型跳转等。
+  ### 1.创建一个全局方法
+  在原有状态基础上，新增一个methods对象，写入你的全局方法：
   ```js
 	let store = new Store({
-	  //。
+	  //状态
 	  state: {
 		msg: '这是一个全局状态'
 	  },
+	  //方法
 	  methods: {
 		goAnyWhere(e){
-		
 			wx.navigateTo({
 				url: e.currentTarget.dataset.url
 			})
+		},
+		sayHello(){
+			console.log('hello')
 		}
 	  }
 	})
   ```
-  这里创建了一个全局方法封装的跳转 goAnyWhere。
+  这里创建了一个全局封装的跳转 goAnyWhere。
   
   ### 2.使用全局方法
+  在wxml中，直接使用`方法名`调用:
   ```html
 	<view bindtap="goAnyWhere" data-url="/index/index">
-		
+		首页
 	</view>
-	
   ```
-  直接使用方法名即可使用。
+  在js中，直接使用 `this.方法名` 来调用:
+  ```js
+	Page({
+		onLoad(){
+		  this.sayHello();
+		}
+	})
+  ```
+  在非页面的js中，我们不建议使用Store中的全局方法。但你可使用getCurrentPage().pop().sayHello() 来调用。
+  
   ### 3.说明
-  全局方法可以封装一些常用方法，性能上不会太损耗（方法都指向一个内存地址），所以可以放心使用。  
+  * 尽量封装复用率高的全局方法
+  * 非交互型事件（即非bindxx）的公用方法，建议不写入Store中。写入App中更好。
   
   
- 
   
+
+## <div id="pageLisener">周期监听 pageLisener</div>
+在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
+现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
+
+### 1.加入监听
+现在以监听onLoad为例， 在Store中新增一个pageLisener对象，将需要监听的周期写入:
+```js
+	// store中
+	let store = new Store({
+	  //状态
+	  state: {
+		...
+	  },
+	  //方法
+	  methods: {
+		...
+	  },
+	  //页面监听
+	  pageLisener: {
+		onLoad(options){
+			console.log('我在' + this.route, '参数为', options);
+		}
+	  }
+	})
+```
+	就这样所有页面的onLoad，将会优先执行此监听。接下来看页面内代码：
+```js
+	// index/index.js 页面
+	Page({
+		onLoad(){
+			console.log(2)
+		}
+	})
+```
+执行结果为:
+``` js
+// 我在index/index 参数为 {...} 
+// 2
+```
+### 2.没有第二步...
+总结：  
+* 先执行pageLisener监听，后执行原本页面中周期。
+* 还支持其他周期事件 ['onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
+	
 
 
 ## <div id="api">api</div>

@@ -3,7 +3,7 @@
  * @update 2018.10.30
  * @version 1.1
  */
-
+const pageLife = ['data', 'onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
 let event = null;
 /** 
  * Store的构造函数
@@ -21,7 +21,7 @@ function Store(options = {}) {
   const [_this, OriginCom, OriginPage] = [this, Component, Page];
   const behavior = options.behavior;
   const methods = options.methods;
-  console.log(methods)
+  const pageLisener = options.pageLisener;
   //重构Component
   Component = function(arg = {}) {
     let attached = arg.attached;
@@ -75,7 +75,20 @@ function Store(options = {}) {
   Page = function(arg = {}) {
     if (typeof methods === 'object'){
       for (let key in methods) {
-        arg[key] = methods[key]
+        if (!pageLife.some(item => item === key)){
+          arg[key] = methods[key]
+        }
+      }
+    }
+    if (typeof pageLisener === 'object'){
+      for (let key in pageLisener) {
+        if (pageLife.some(item => item === key) && typeof pageLisener[key] === 'function') {
+          let originLife = arg[key];
+          arg[key] = function(){
+            pageLisener[key].call(this, ...arguments);
+            originLife.call(this, ...arguments);
+          }
+        }
       }
     }
     arg.data = {

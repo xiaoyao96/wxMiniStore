@@ -19,6 +19,14 @@ let store = new Store({
       wx.navigateTo({
         url: e.currentTarget.dataset.url
       })
+    },
+    onLoad(){
+      console.log(12323232)
+    }
+  },
+  pageLisener: {
+    onLoad(options){
+      console.log('我在' + this.route, '参数为', options);
     }
   }
 })
