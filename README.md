@@ -2,7 +2,7 @@
 
 一个基于微信小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中查看。
 ## 更新日志
-\[2018.10.31\] 拓展新增[周期监听 pageLisener字段](#pageLisener)，可监听所有页面的所有生命周期事件。
+\[2018.10.31\] 拓展新增[周期监听 pageLisener字段](#lisener)，可监听所有页面的所有生命周期事件。  
 \[2018.10.30\] 拓展新增功能[全局方法 methods字段](#f)，大幅优化setState性能。更新前需调整Store结构，请阅读[Store对象参数详情](#api)。  
 \[2018.9.26\] 由于引用关系错乱且微信会报错，已修改为部分引用关系。即各个页面的$state不再完全相等，但$state.key 完全相等。  
 \[2018.9.10\] 修复在页面未加载完时，调用setState报错。  
@@ -11,7 +11,7 @@
 * [开始](#start)  
 * [全局状态](#state)
 * [全局方法](#f)
-* [全局页面周期](#pageLisener)
+* [全局页面周期](#lisener)
 * [Api说明](#api)
 * [总结及建议](#end)
 
@@ -87,23 +87,23 @@ Page({
   ### 1.创建一个全局方法
   在原有状态基础上，新增一个methods对象，写入你的全局方法：
   ```js
-	let store = new Store({
-	  //状态
-	  state: {
-		msg: '这是一个全局状态'
-	  },
-	  //方法
-	  methods: {
-		goAnyWhere(e){
-			wx.navigateTo({
-				url: e.currentTarget.dataset.url
-			})
-		},
-		sayHello(){
-			console.log('hello')
-		}
-	  }
-	})
+		let store = new Store({
+		  //状态
+		  state: {
+			msg: '这是一个全局状态'
+		  },
+		  //方法
+		  methods: {
+			goAnyWhere(e){
+				wx.navigateTo({
+					url: e.currentTarget.dataset.url
+				})
+			},
+			sayHello(){
+				console.log('hello')
+			}
+		  }
+		})
   ```
   这里创建了一个全局封装的跳转 goAnyWhere。
   
@@ -131,7 +131,7 @@ Page({
   
   
 
-## <div id="pageLisener">周期监听 pageLisener</div>
+## <div id="lisener">周期监听 pageLisener</div>
 在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
 现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
 
