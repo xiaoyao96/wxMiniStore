@@ -1,6 +1,11 @@
 # wxMiniStore
 
-一个基于原生小程序的mini全局状态管理库。源码为微信小程序片段，可下载导入微信开发助手中查看。
+一个基于原生小程序的mini全局状态管理库，五行代码即可引入。
+* 全局状态state支持所有Page和Component，状态完全同步，并提供api更新状态。
+* 周期监听pageLisener能监听所有页面的onLoad，onShow等周期事件。
+* 全局事件methods，全局可用的方法。
+* 适合原生小程序，可以随时引入，不影响原有的业务，拓展性强。
+
 ## 更新日志
 \[2018.10.31\] 拓展新增[周期监听 pageLisener字段](#lisener)，可监听所有页面的所有生命周期事件。  
 \[2018.10.30\] 拓展新增功能[全局方法 methods字段](#f)，大幅优化setState性能。更新前需调整Store结构，请阅读[Store对象参数详情](#api)。  
@@ -10,8 +15,8 @@
 ### 导航
 * [开始](#start)  
 * [全局状态](#state)
-* [全局方法](#f)
 * [全局页面周期](#lisener)
+* [全局方法](#f)
 * [Api说明](#api)
 * [总结及建议](#end)
 
@@ -83,6 +88,50 @@ Page({
 });
 
 ```
+## <div id="lisener">周期监听 pageLisener</div>
+在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
+现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
+
+### 1.加入监听
+现在以监听onLoad为例， 在Store中新增一个pageLisener对象，将需要监听的周期写入:
+```js
+// store中
+let store = new Store({
+    //状态
+    state: {
+		//...
+    },
+    //方法
+    methods: {
+		//...
+    },
+    //页面监听
+    pageLisener: {
+        onLoad(options){
+            console.log('我在' + this.route, '参数为', options);
+        }
+    }
+})
+```
+就这样所有页面的onLoad，将会优先执行此监听。接下来看页面内代码：
+
+```js
+// index/index.js 页面
+Page({
+    onLoad(){
+        console.log(2)
+    }
+})
+```
+执行结果为:
+``` js
+// 我在index/index 参数为 {...} 
+// 2
+```
+### 2.没有第二步...
+总结：  
+* 先执行pageLisener监听，后执行原本页面中周期。
+* 还支持其他周期事件 ['onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
 
 ## <div id="f">全局方法 methods</div>
   新增methods，全局可使用。
@@ -130,55 +179,6 @@ Page({
   ### 3.说明
   * 尽量封装复用率高的全局方法
   * 非交互型事件（即非bindxx）的公用方法，建议不写入Store中。写入App中更好。
-
-  
-
-
-## <div id="lisener">周期监听 pageLisener</div>
-在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
-现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
-
-### 1.加入监听
-现在以监听onLoad为例， 在Store中新增一个pageLisener对象，将需要监听的周期写入:
-```js
-// store中
-let store = new Store({
-    //状态
-    state: {
-		//...
-    },
-    //方法
-    methods: {
-		//...
-    },
-    //页面监听
-    pageLisener: {
-        onLoad(options){
-            console.log('我在' + this.route, '参数为', options);
-        }
-    }
-})
-```
-就这样所有页面的onLoad，将会优先执行此监听。接下来看页面内代码：
-
-```js
-// index/index.js 页面
-Page({
-    onLoad(){
-        console.log(2)
-    }
-})
-```
-执行结果为:
-``` js
-// 我在index/index 参数为 {...} 
-// 2
-```
-### 2.没有第二步...
-总结：  
-* 先执行pageLisener监听，后执行原本页面中周期。
-* 还支持其他周期事件 ['onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
-	
 
 
 ## <div id="api">api</div>
