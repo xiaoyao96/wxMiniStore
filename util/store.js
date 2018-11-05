@@ -61,12 +61,12 @@ function Store(options = {}) {
           }
         })
       }
-      attached && attached.bind(this)(...arguments);
+      attached && attached.call(this, ...arguments);
     }
     let detached = arg.detached;
     arg.detached = function() {
       _this.$r.splice(_this.$r.findIndex(item => item === this), 1);
-      detached && detached.bind(this)(...arguments);
+      detached && detached.call(this, ...arguments);
     }
     OriginCom(arg)
   };
@@ -86,7 +86,7 @@ function Store(options = {}) {
           let originLife = arg[key];
           arg[key] = function(){
             pageLisener[key].call(this, ...arguments);
-            originLife.call(this, ...arguments);
+            originLife && originLife.call(this, ...arguments);
           }
         }
       }
@@ -107,12 +107,12 @@ function Store(options = {}) {
           }
         })
       }
-      onLoad && onLoad.bind(this)(...arguments);
+      onLoad && onLoad.call(this, ...arguments);
     }
     let onUnload = arg.onUnload;
     arg.onUnload = function() {
       _this.$r.splice(_this.$r.findIndex(item => item === this), 1);
-      onUnload && onUnload.bind(this)(...arguments);
+      onUnload && onUnload.call(this, ...arguments);
     }
     OriginPage(arg)
   };
