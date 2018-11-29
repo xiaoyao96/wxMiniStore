@@ -138,6 +138,7 @@ b页面没有设置，所以为undefined，但两个页面均可通过store.$sta
 ### 3.注意事项
 * openPart一旦开启，所有没有设置useStore的页面和组件将不能在wxml中使用$state。
 * 组件或页面.js中，我们建议使用getApp().store.$state去获取全局状态，因为他没有限制。
+* 仅在wxml中需要用到$state的页面和组件中开启useStore。
 
 
 
