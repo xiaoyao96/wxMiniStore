@@ -10,15 +10,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 /**
  * @author 逍遥
- * @update 2018.10.30
- * @version 1.1
+ * @update 2018.11.29
+ * @version 1.11   
  */
 var pageLife = ['data', 'onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap'];
-var event = null;
 /** 
  * Store的构造函数
- * @param {json} options 所有状态
- * @return 用new关键字初始化，可获得一个全局状态
+ * @param {Object} options 所有状态
+ * @return {Store} 用new关键字初始化，可获得一个全局状态
  */
 function Store() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -36,10 +35,18 @@ function Store() {
   var behavior = options.behavior;
   var methods = options.methods;
   var pageLisener = options.pageLisener;
+  var auto = true;
+  if (typeof options.auto !== 'undefined'){
+    auto = !!options.auto
+  }
+  this.$auto = auto;
+  //栈清空
+  var runEvent = function() {
+    this.setData(_defineProperty({}, '$state', _extends({}, _this.$state)));
+  }
   //重构Component
   Component = function Component() {
     var arg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
     var attached = arg.attached;
     //behavior 注入
     if (behavior) {
@@ -57,23 +64,33 @@ function Store() {
         arg.methods = _extends({}, methods);
       }
     }
-    arg.data = _extends({}, arg.data, {
-      $state: _this.$state
-    });
+    //状态注入
+    if (!auto){
+      if (arg.useStore === true) {
+        arg.data = _extends({}, arg.data, {
+          $state: _this.$state
+        });
+      }
+    }else{
+      arg.data = _extends({}, arg.data, {
+        $state: _this.$state
+      });
+    }
     arg.attached = function () {
       _this.$r.push(this);
-      if (event) {
-        event();
-        event = null;
+      if (!auto) {
+        if (arg.useStore === true) {
+          this.useStore = true
+          runEvent.call(this)
+        }
       } else {
-        this.setData(_defineProperty({}, '$state', _extends({}, _this.$state)));
+        runEvent.call(this)
       }
       attached && attached.call.apply(attached, [this].concat(Array.prototype.slice.call(arguments)));
     };
     var detached = arg.detached;
     arg.detached = function () {
       var _this2 = this;
-
       _this.$r.splice(_this.$r.findIndex(function (item) {
         return item === _this2;
       }), 1);
@@ -118,17 +135,28 @@ function Store() {
         _loop2(key);
       }
     }
-    arg.data = _extends({}, arg.data, {
-      $state: _this.$state
-    });
+    //状态注入
+    if (!auto) {
+      if (arg.useStore === true) {
+        arg.data = _extends({}, arg.data, {
+          $state: _this.$state
+        });
+      }
+    } else {
+      arg.data = _extends({}, arg.data, {
+        $state: _this.$state
+      });
+    }
     var onLoad = arg.onLoad;
     arg.onLoad = function () {
       _this.$r.push(this);
-      if (event) {
-        event();
-        event = null;
+      if (!auto) {
+        if (arg.useStore === true) {
+          this.useStore = true
+          runEvent.call(this)
+        }
       } else {
-        this.setData(_defineProperty({}, '$state', _extends({}, _this.$state)));
+        runEvent.call(this)
       }
       onLoad && onLoad.call.apply(onLoad, [this].concat(Array.prototype.slice.call(arguments)));
     };
@@ -147,46 +175,71 @@ function Store() {
 
 /** 
  * 用于同步更新全局状态
- * @param {json} arg 初始化节点
- * @param {function} callback 更新后的回调，可获取Dom
+ * @param {Object} arg 初始化节点
+ * @param {Function} callback 更新后的回调，可获取Dom
  * @return 无返回值
  */
 Store.prototype.setState = function (arg, callback) {
   if ((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) != 'object' && arg !== null) {
     throw new Error('第一个参数必须为object对象');
   }
+  
   var _this = this,
     pros = [],
-    obj = {};
-  //组装将要更新的obj
-  for (var key in arg) {
-    obj['$state.' + key] = arg[key];
-  }
-  var hanlder = function hanlder() {
+    obj = {},
+    isNull = false;
+  var $r = _this.$r;
+  var f = function(){
+    if (!_this.$auto){
+      $r = _this.$r.filter(function(item){
+        return item.useStore === true
+      })
+    }
+    if($r.length === 0){
+      isNull = true;
+      $r = [_this.$r[0]]
+      $r[0].data.$state = _extends({}, _this.$state)
+    }
+    //组装将要更新的obj
+    for (var key in arg) {
+      obj['$state.' + key] = arg[key];
+    }
     var _loop3 = function _loop3(i) {
-      var item = _this.$r[i];
+      var item = $r[i];
       var p = new Promise(function (resolve) {
         item.setData(_extends({}, obj), resolve);
       });
       pros.push(p);
     };
-
     // 倒着更新。后进先出
-    for (var i = _this.$r.length - 1; i >= 0; i--) {
+    for (var i = $r.length - 1; i >= 0; i--) {
       _loop3(i);
     }
     Promise.all(pros).then(function (_) {
       typeof callback === 'function' && callback();
     });
-    _this.$r[0] && (_this.$state = _extends({}, _this.$r[0].data.$state));
-  };
-  if (_this.$r.length > 0) {
-    hanlder();
-  } else {
-    event = function event() {
-      hanlder();
-    };
+    if (isNull) {
+      $r[0] && (_this.$state = _extends({}, _this.$state, $r[0].data.$state));
+      $r[0].setData({
+        $state: {}
+      })
+      delete $r[0].data.$state;
+    } else {
+      $r[0] && (_this.$state = _extends({}, $r[0].data.$state));
+    }
   }
+  if($r.length == 0){
+    var inter = setInterval(function(){
+      if(_this.$r.length > 0){
+        f()
+        clearInterval(inter)
+      }
+    }, 100)
+  }else{
+    f();
+  }
+  
+
 };
-Store.version = 1.1;
+Store.version = 1.11;
 module.exports = Store;
