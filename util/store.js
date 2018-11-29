@@ -35,11 +35,8 @@ function Store() {
   var behavior = options.behavior;
   var methods = options.methods;
   var pageLisener = options.pageLisener;
-  var auto = true;
-  if (typeof options.auto !== 'undefined'){
-    auto = !!options.auto
-  }
-  this.$auto = auto;
+  var openPart = options.openPart
+  this.$openPart = openPart;
   //栈清空
   var runEvent = function() {
     this.setData(_defineProperty({}, '$state', _extends({}, _this.$state)));
@@ -65,7 +62,7 @@ function Store() {
       }
     }
     //状态注入
-    if (!auto){
+    if (openPart){
       if (arg.useStore === true) {
         arg.data = _extends({}, arg.data, {
           $state: _this.$state
@@ -78,7 +75,7 @@ function Store() {
     }
     arg.attached = function () {
       _this.$r.push(this);
-      if (!auto) {
+      if (openPart) {
         if (arg.useStore === true) {
           this.useStore = true
           runEvent.call(this)
@@ -136,7 +133,7 @@ function Store() {
       }
     }
     //状态注入
-    if (!auto) {
+    if (openPart) {
       if (arg.useStore === true) {
         arg.data = _extends({}, arg.data, {
           $state: _this.$state
@@ -150,7 +147,7 @@ function Store() {
     var onLoad = arg.onLoad;
     arg.onLoad = function () {
       _this.$r.push(this);
-      if (!auto) {
+      if (openPart) {
         if (arg.useStore === true) {
           this.useStore = true
           runEvent.call(this)
@@ -190,7 +187,7 @@ Store.prototype.setState = function (arg, callback) {
     isNull = false;
   var $r = _this.$r;
   var f = function(){
-    if (!_this.$auto){
+    if (_this.$openPart){
       $r = _this.$r.filter(function(item){
         return item.useStore === true
       })

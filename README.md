@@ -7,6 +7,7 @@
 * 适合原生小程序，可以随时引入，不影响原有的业务，拓展性强。
 
 ## 更新日志
+\[2018.11.29\] 新增[局部状态模式](#part), 可设置$state部分组件可用，大幅提升性能。
 \[2018.11.16\] 支持es5。
 \[2018.10.31\] 拓展新增[周期监听 pageLisener字段](#lisener)，可监听所有页面的所有生命周期事件。  
 \[2018.10.30\] 拓展新增功能[全局方法 methods字段](#f)，大幅优化setState性能。更新前需调整Store结构，请阅读[Store对象参数详情](#api)。  
@@ -16,6 +17,7 @@
 ### 导航
 * [开始](#start)  
 * [全局状态](#state)
+* [局部状态模式](#part)
 * [全局页面周期](#lisener)
 * [全局方法](#f)
 * [Api说明](#api)
@@ -89,6 +91,56 @@ Page({
 });
 
 ```
+## <div id="part">状态局部模式</div>
+在项目的组件和页面越来越多且复用率越来越高时，全局$state的利用率就很低，这时候就出现了一种情况，页面中的组件和页面达到百千量级，每个内部都有一个$state，而用到它的可能就只有1个或几个。就会引起各种性能问题。比如更新$state十分缓慢，且低效。  
+这时候你需要将$state调整为部分组件和页面可用，而不是所有。
+### 1.开启局部模式
+``` js
+let store = new Store({
+  //。
+  state: {
+    msg: '这是一个全局状态'
+  },
+  openPart: true
+})
+```
+openPart 字段表示是否开启局部模式，默认值为false。当我们想规定只有某些页面和组件使用$state时，就需开启此模式，设置为true。  
+### 2.设置范围
+在需要使用$state的组件中，加入`userStore: true`，表示当前页面或组件可用$state。
+``` js
+// a.js
+Page({
+  useStore: true,
+  onLoad(){
+    console.log(this.data.$state) // { msg: '这是一个全局状态' }
+    console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
+  }
+})
+
+// b.js
+Page({
+  onLoad(){
+    console.log(this.data.$state) // undefined
+    console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
+  }
+})
+```
+a页面设置了Store可用，所以可以通过this.data.$state获取。
+b页面没有设置，所以为undefined，但两个页面均可通过store.$state获取。
+``` html
+<--! a页面有效 -->
+<view>{{$state.msg}}</view>
+
+<--! b页面无效 -->
+<view>{{$state.msg}}</view>
+```
+
+### 3.注意事项
+* openPart一旦开启，所有没有设置useStore的页面和组件将不能在wxml中使用$state。
+* 组件或页面.js中，我们建议使用getApp().store.$state去获取全局状态，因为他没有限制。
+
+
+
 ## <div id="lisener">周期监听 pageLisener</div>
 在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
 现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
@@ -159,6 +211,7 @@ let store = new Store({
 })
   ```
   这里创建了一个全局封装的跳转 goAnyWhere。
+
 
   ### 2.使用全局方法
   在wxml中，直接使用`方法名`调用:
