@@ -29,9 +29,12 @@
 
 ### 1. 引入
 
-将本项目中util下的store.js复制到你的项目中，并引入：
+将本项目中util下的store.js复制到你的项目中，并在`app.js第一行`引入：
 ```js
+//app.js中
 const Store = require('util/store.js');
+App({
+})
 ```
 ### <div id="state">2. 实例化一个全局状态 state</div>
 Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
@@ -43,6 +46,8 @@ let store = new Store({
   }
 })
 console.log(store.$state.msg); //这是一个全局状态
+App({
+})
 ```
 ### 3.在App中注入store
 这么做是为了在其他页面中使用store。
