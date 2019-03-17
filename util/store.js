@@ -127,7 +127,7 @@ function Store(option) {
   this.version = 1.2
 }
 
-Store.prototype.setState = function (obj, fn) {
+Store.prototype.setState = function (obj, fn = () => {}) {
   if (_typeOf(obj) !== TYPE_OBJECT) {
     throw new Error('setState的第一个参数须为object!')
   }
