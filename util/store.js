@@ -1,242 +1,220 @@
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 /**
  * @author 逍遥
- * @update 2018.11.29
- * @version 1.11   
+ * @update 2019.3.17
+ * @version 1.2 
  */
-var pageLife = ['data', 'onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap'];
-/** 
- * Store的构造函数
- * @param {Object} options 所有状态
- * @return {Store} 用new关键字初始化，可获得一个全局状态
- */
-function Store() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-  //所有页面及组件
-  this.$r = [];
-  //状态库
-  options.state || (options.state = {});
-  this.$state = _extends({}, options.state);
-
-  var _this = this,
-    OriginCom = Component,
-    OriginPage = Page;
-
-  var behavior = options.behavior;
-  var methods = options.methods;
-  var pageLisener = options.pageLisener;
-  var openPart = options.openPart
-  this.$openPart = openPart;
-  //栈清空
-  var runEvent = function() {
-    this.setData(_defineProperty({}, '$state', _extends({}, _this.$state)));
+const TYPE_ARRAY = '[object Array]'
+const TYPE_OBJECT = '[object Object]'
+function Store(option) {
+  //必要参数的默认值处理
+  const {
+    state = {},
+    openPart = false,
+    behavior,
+    methods = {},
+    pageLisener = {}
+  } = option;
+  //状态初始化
+  this.$state = {};
+  if (_typeOf(option.state) === TYPE_OBJECT) {
+    this.$state = Object.assign({}, option.state);
   }
-  //重构Component
-  Component = function Component() {
-    var arg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    var attached = arg.attached;
-    //behavior 注入
+  //页面+组件树
+  this.$r = [];
+  //创建时，添加组件
+  const _create = function (r) {
+    _store.$r.push(r);
+    r.setData({
+      $state: _store.$state
+    })
+  }
+  //销毁时，移除组件
+  const _destroy = function (r) {
+    let index = _store.$r.findIndex(item => item === r);
+    if (index > -1) {
+      _store.$r.splice(index, 1)
+    }
+  }
+  //状态局部模式
+  this.$openPart = openPart;
+  //其他参数
+  const _store = this;
+  const pageLife = ['data', 'onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap'];
+  const canUseStore = function (o) {
+    return (openPart === true && o.useStore === true) || !openPart;
+  }
+
+  const originPage = Page,
+    originComponent = Component;
+  //重写Page
+  Page = function (o, ...args) {
+    if (canUseStore(o)) {
+      //状态注入
+      o.data = Object.assign(o.data || {}, {
+        $state: _store.$state
+      });
+    }
+    //行为注入
+    Object.keys(methods).forEach(key => {
+      //不能是周期事件
+      if (typeof methods[key] === 'function' && !pageLife.some(item => item === key)) {
+        o[key] = methods[key];
+      }
+    })
+    //覆盖原周期
+    const originCreate = o.onLoad;
+    o.onLoad = function () {
+      if (canUseStore(o)) {
+        _create(this);
+      }
+      originCreate && originCreate.apply(this, arguments)
+    }
+    const originonDestroy = o.onUnload;
+    o.onUnload = function () {
+      _destroy(this);
+      originonDestroy && originonDestroy.apply(this, arguments)
+    }
+    //其他页面周期事件注入 pageListener
+    Object.keys(pageLisener).forEach(key => {
+      //不能是周期事件
+      if (typeof pageLisener[key] === 'function' && pageLife.some(item => item === key)) {
+        const originLife = o[key];
+        o[key] = function () {
+          pageLisener[key].apply(this, arguments);
+          originLife.apply(this, arguments);
+        }
+      }
+    })
+    originPage(o, ...args)
+  }
+
+  //重写组件
+  Component = function (o, ...args) {
+    //状态注入
+    if (canUseStore(o)) {
+      o.data = Object.assign(o.data || {}, {
+        $state: _store.$state
+      });
+    }
+    //行为注入
+    Object.keys(methods).forEach(key => {
+      //不能是周期事件
+      if (typeof methods[key] === 'function' && !pageLife.some(item => item === key)) {
+        o.methods || (o.methods = {});
+        o.methods[key] = methods[key];
+      }
+    })
+    //behavior
     if (behavior) {
-      if (arg.behaviors) {
-        arg.behaviors = [behavior].concat(_toConsumableArray(arg.behaviors));
-      } else {
-        arg.behaviors = [behavior];
-      }
+      o.behaviors = [behavior, ...(o.behaviors || [])]
     }
-    // 全局方法注入
-    if ((typeof methods === 'undefined' ? 'undefined' : _typeof(methods)) === 'object') {
-      if (_typeof(arg.methods) === 'object') {
-        arg.methods = _extends({}, methods, arg.methods);
-      } else {
-        arg.methods = _extends({}, methods);
+    //覆盖原周期
+    const originCreate = o.attached;
+    o.attached = function () {
+      if (canUseStore(o)) {
+        _create(this);
       }
+      originCreate && originCreate.apply(this, arguments)
     }
-    //状态注入
-    if (openPart){
-      if (arg.useStore === true) {
-        arg.data = _extends({}, arg.data, {
-          $state: _this.$state
-        });
-      }
-    }else{
-      arg.data = _extends({}, arg.data, {
-        $state: _this.$state
-      });
+    const originonDestroy = o.detached;
+    o.detached = function () {
+      _destroy(this);
+      originonDestroy && originonDestroy.apply(this, arguments)
     }
-    arg.attached = function () {
-      _this.$r.push(this);
-      if (openPart) {
-        if (arg.useStore === true) {
-          this.useStore = true
-          runEvent.call(this)
-        }
-      } else {
-        runEvent.call(this)
-      }
-      attached && attached.call.apply(attached, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-    var detached = arg.detached;
-    arg.detached = function () {
-      var _this2 = this;
-      _this.$r.splice(_this.$r.findIndex(function (item) {
-        return item === _this2;
-      }), 1);
-      detached && detached.call.apply(detached, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-    OriginCom(arg);
-  };
-
-  //重构Page
-  Page = function Page() {
-    var arg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-    if ((typeof methods === 'undefined' ? 'undefined' : _typeof(methods)) === 'object') {
-      var _loop = function _loop(key) {
-        if (!pageLife.some(function (item) {
-          return item === key;
-        })) {
-          arg[key] = methods[key];
-        }
-      };
-
-      for (var key in methods) {
-        _loop(key);
-      }
-    }
-    if ((typeof pageLisener === 'undefined' ? 'undefined' : _typeof(pageLisener)) === 'object') {
-      var _loop2 = function _loop2(key) {
-        if (pageLife.some(function (item) {
-          return item === key;
-        }) && typeof pageLisener[key] === 'function') {
-          var originLife = arg[key];
-          arg[key] = function () {
-            var _pageLisener$key;
-
-            (_pageLisener$key = pageLisener[key]).call.apply(_pageLisener$key, [this].concat(Array.prototype.slice.call(arguments)));
-            originLife && originLife.call.apply(originLife, [this].concat(Array.prototype.slice.call(arguments)));
-          };
-        }
-      };
-
-      for (var key in pageLisener) {
-        _loop2(key);
-      }
-    }
-    //状态注入
-    if (openPart) {
-      if (arg.useStore === true) {
-        arg.data = _extends({}, arg.data, {
-          $state: _this.$state
-        });
-      }
-    } else {
-      arg.data = _extends({}, arg.data, {
-        $state: _this.$state
-      });
-    }
-    var onLoad = arg.onLoad;
-    arg.onLoad = function () {
-      _this.$r.push(this);
-      if (openPart) {
-        if (arg.useStore === true) {
-          this.useStore = true
-          runEvent.call(this)
-        }
-      } else {
-        runEvent.call(this)
-      }
-      onLoad && onLoad.call.apply(onLoad, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-    var onUnload = arg.onUnload;
-    arg.onUnload = function () {
-      var _this3 = this;
-
-      _this.$r.splice(_this.$r.findIndex(function (item) {
-        return item === _this3;
-      }), 1);
-      onUnload && onUnload.call.apply(onUnload, [this].concat(Array.prototype.slice.call(arguments)));
-    };
-    OriginPage(arg);
-  };
+    originComponent(o, ...args)
+  }
+  this.version = 1.2
 }
 
-/** 
- * 用于同步更新全局状态
- * @param {Object} arg 初始化节点
- * @param {Function} callback 更新后的回调，可获取Dom
- * @return 无返回值
- */
-Store.prototype.setState = function (arg, callback) {
-  if ((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) != 'object' && arg !== null) {
-    throw new Error('第一个参数必须为object对象');
+Store.prototype.setState = function (obj, fn) {
+  if (_typeOf(obj) !== TYPE_OBJECT) {
+    throw new Error('setState的第一个参数须为object!')
   }
-  
-  var _this = this,
-    pros = [],
-    obj = {},
-    isNull = false;
-  var $r = _this.$r;
-  var f = function(){
-    if (_this.$openPart){
-      $r = _this.$r.filter(function(item){
-        return item.useStore === true
+  console.timeline('setState')
+  if (this.$r.length > 0) {
+    const newObj = {}
+    Object.keys(obj).forEach(key => {
+      newObj['$state.' + key] = obj[key]
+    })
+    let pros = this.$r.map(item => {
+      return new Promise(r => {
+        item.setData(newObj, r)
       })
-    }
-    if($r.length === 0){
-      isNull = true;
-      $r = [_this.$r[0]]
-      $r[0].data.$state = _extends({}, _this.$state)
-    }
-    //组装将要更新的obj
-    for (var key in arg) {
-      obj['$state.' + key] = arg[key];
-    }
-    var _loop3 = function _loop3(i) {
-      var item = $r[i];
-      var p = new Promise(function (resolve) {
-        item.setData(_extends({}, obj), resolve);
-      });
-      pros.push(p);
-    };
-    // 倒着更新。后进先出
-    for (var i = $r.length - 1; i >= 0; i--) {
-      _loop3(i);
-    }
-    Promise.all(pros).then(function (_) {
-      typeof callback === 'function' && callback();
-    });
-    if (isNull) {
-      $r[0] && (_this.$state = _extends({}, _this.$state, $r[0].data.$state));
-      $r[0].setData({
-        $state: {}
-      })
-      delete $r[0].data.$state;
-    } else {
-      $r[0] && (_this.$state = _extends({}, $r[0].data.$state));
-    }
+    })
+    Promise.all(pros).then(fn);
+  } else {
+    setData(obj, this.$state);
+    fn();
   }
-  if($r.length == 0){
-    var inter = setInterval(function(){
-      if(_this.$r.length > 0){
-        f()
-        clearInterval(inter)
-      }
-    }, 100)
-  }else{
-    f();
-  }
-  
+  console.timelineEnd('setState')
+}
 
-};
-Store.version = 1.11;
-module.exports = Store;
+const _typeOf = function (val) {
+  return Object.prototype.toString.call(val)
+}
+
+const setData = function (obj, data) {
+  Object.keys(obj).forEach(key => {
+    dataHandler(key, obj[key], data);
+  })
+}
+
+const dataHandler = function (key, result, data) {
+  let arr = pathHandler(key);
+  let d = data;
+  for (let i = 0; i < arr.length - 1; i++) {
+    keyToData(arr[i], arr[i + 1], d);
+    d = d[arr[i]];
+  }
+  d[arr[arr.length - 1]] = result;
+}
+
+const pathHandler = function (key) {
+  let current = '',
+    keyArr = [];
+  for (let i = 0, len = key.length; i < len; i++) {
+    if (key[0] === '[') {
+      throw new Error('key值不能以[]开头')
+    }
+    if (key[i].match(/\.|\[/g)) {
+      cleanAndPush(current, keyArr)
+      current = '';
+    }
+    current += key[i];
+  }
+  cleanAndPush(current, keyArr)
+  return keyArr;
+}
+
+const cleanAndPush = function (key, arr) {
+  let r = cleanKey(key);
+  if (r !== '') {
+    arr.push(r)
+  }
+}
+
+const keyToData = function (prev, current, data) {
+  if (prev === '') {
+    return
+  }
+  const type = _typeOf(data[prev]);
+  if (typeof current === 'number' && type !== TYPE_ARRAY) {
+    data[prev] = []
+  } else if (typeof current === 'string' && type !== TYPE_OBJECT) {
+    data[prev] = {}
+  }
+}
+
+const cleanKey = function (key) {
+  if (key.match(/\[\S+\]/g)) {
+    let result = key.replace(/\[|\]/g, '');
+    if (!Number.isNaN(parseInt(result))) {
+      return +result
+    } else {
+      throw new Error(`[]中必须为数字`)
+    }
+  }
+  return key.replace(/\[|\.|\]| /g, '')
+}
+module.exports = Store

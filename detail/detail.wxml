@@ -1,5 +1,5 @@
 
-
+<child />
 <view class="intro">第一步：进入 app.js 按照步骤配置 Store</view>
 
 <view class="intro">第二步：任意地方wxml中使用{{ "{{$state.x}}" }}，template需要在data中引入$state</view>

@@ -1,5 +1,6 @@
 // component/text.js
 Component({
+  useStore: true,
   /**
    * 组件的属性列表
    */

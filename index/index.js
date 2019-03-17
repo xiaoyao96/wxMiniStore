@@ -1,16 +1,11 @@
 const app = getApp()
 
 Page({
+  useStore: true,
   data: {
 
   },
   onLoad: function () {
-    console.log(this.f(1))
-  },
-  toUpper(str) {
-    return 1
-  },
-  f(str){
-    return 2
+    console.log('获取得到，开启了useStore', this.data.$state)
   }
 })

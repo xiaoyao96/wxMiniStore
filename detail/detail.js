@@ -1,11 +1,8 @@
 const app = getApp()
 
 Page({
-  data: {
-
-  },
   onLoad: function () {
-
+    console.log('获取不到，没有开启useStore', this.data.$state)
   },
   finish(){
     app.store.setState({

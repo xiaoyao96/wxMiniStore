@@ -28,7 +28,9 @@ let store = new Store({
     onLoad(options){
       console.log('我在' + this.route, '参数为', options);
     }
-  }
+  },
+  //开启了局部模式
+  openPart: true
 })
 App({
   onLaunch: function () {

@@ -6,3 +6,4 @@
 <button bindtap='goAnyWhere' data-url='/detail/detail'>
   开始
 </button>
+
