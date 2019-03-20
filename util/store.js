@@ -131,7 +131,7 @@ Store.prototype.setState = function (obj, fn = () => {}) {
   if (_typeOf(obj) !== TYPE_OBJECT) {
     throw new Error('setState的第一个参数须为object!')
   }
-  console.timeline('setState')
+  console.timeline && console.timeline('setState')
   if (this.$r.length > 0) {
     const newObj = {}
     Object.keys(obj).forEach(key => {
@@ -147,7 +147,7 @@ Store.prototype.setState = function (obj, fn = () => {}) {
     setData(obj, this.$state);
     fn();
   }
-  console.timelineEnd('setState')
+  console.timelineEnd && console.timelineEnd('setState')
 }
 
 const _typeOf = function (val) {
