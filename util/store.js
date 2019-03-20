@@ -142,6 +142,7 @@ Store.prototype.setState = function (obj, fn = () => {}) {
         item.setData(newObj, r)
       })
     })
+    setData(obj, this.$state);    
     Promise.all(pros).then(fn);
   } else {
     setData(obj, this.$state);
