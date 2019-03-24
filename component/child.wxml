@@ -1,5 +1,5 @@
 <!--component/text.wxml-->
 <view>
-  <view>我是一个子组件，这是全局的用户信息：</view>
+  <view>我是一个子组件，这是全局的用户信息{{msg}}：</view>
   <view>我叫{{$state.user.name}}</view>
 </view>

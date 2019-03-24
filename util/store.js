@@ -1,7 +1,7 @@
 /**
  * @author 逍遥
- * @update 2019.3.17
- * @version 1.2 
+ * @update 2019.3.24
+ * @version 1.2.1
  */
 
 const TYPE_ARRAY = '[object Array]'
@@ -13,7 +13,8 @@ function Store(option) {
     openPart = false,
     behavior,
     methods = {},
-    pageLisener = {}
+    pageLisener = {},
+    nonWritable = false
   } = option;
   //状态初始化
   this.$state = {};
@@ -47,8 +48,9 @@ function Store(option) {
 
   const originPage = Page,
     originComponent = Component;
+
   //重写Page
-  Page = function (o, ...args) {
+  App.Page = function (o, ...args) {
     if (canUseStore(o)) {
       //状态注入
       o.data = Object.assign(o.data || {}, {
@@ -89,8 +91,12 @@ function Store(option) {
     originPage(o, ...args)
   }
 
+  if (!nonWritable) {
+    try { Page = App.Page } catch (e) { }
+  }
+
   //重写组件
-  Component = function (o, ...args) {
+  App.Component = function (o, ...args) {
     //状态注入
     if (canUseStore(o)) {
       o.data = Object.assign(o.data || {}, {
@@ -109,25 +115,41 @@ function Store(option) {
     if (behavior) {
       o.behaviors = [behavior, ...(o.behaviors || [])]
     }
-    //覆盖原周期
-    const originCreate = o.attached;
-    o.attached = function () {
+    const { lifetimes = {} } = o;
+
+    let originCreate = lifetimes.attached || o.attached,
+      originonDestroy = lifetimes.detached || o.detached;
+    const attached = function () {
       if (canUseStore(o)) {
         _create(this);
       }
       originCreate && originCreate.apply(this, arguments)
     }
-    const originonDestroy = o.detached;
-    o.detached = function () {
+
+    const detached = function () {
       _destroy(this);
       originonDestroy && originonDestroy.apply(this, arguments)
     }
+    if (_typeOf(o.lifetimes) === TYPE_OBJECT) {
+      o.lifetimes.attached = attached;
+      o.lifetimes.detached = detached;
+    } else {
+      o.attached = attached;
+      o.detached = detached;
+    }
+
+    //覆盖原周期
+
     originComponent(o, ...args)
   }
+  if (!nonWritable) {
+    try { Component = App.Component } catch (e) { }
+  }
+
   this.version = 1.2
 }
 
-Store.prototype.setState = function (obj, fn = () => {}) {
+Store.prototype.setState = function (obj, fn = () => { }) {
   if (_typeOf(obj) !== TYPE_OBJECT) {
     throw new Error('setState的第一个参数须为object!')
   }
@@ -142,7 +164,7 @@ Store.prototype.setState = function (obj, fn = () => {}) {
         item.setData(newObj, r)
       })
     })
-    setData(obj, this.$state);    
+    setData(obj, this.$state);
     Promise.all(pros).then(fn);
   } else {
     setData(obj, this.$state);
