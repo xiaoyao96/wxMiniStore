@@ -7,6 +7,12 @@
 * 适合原生小程序，可以随时引入，不影响原有的业务，拓展性强。
 
 ## 更新日志
+
+### 1.2.1
+\[2019.3.24\] `F`: 修复使用plugins插件时，提示non-writable错误。[(解决方案)](#nonWritable)。    
+\[2019.3.24\] `F`: 对Component中lifetimes字段的兼容。
+
+
 ### 1.2 
 \[2019.3.21\] `F`:测试发现小程序原生的setData会默认深拷贝目标对象。所以导致了#3，目前已修复，也说明了setState后，各个页面的$state不再是完全引用的关系。  
 \[2019.3.17\] `U`:不再支持es5，并重写源码(es6)，代码更少，做的更多，又恢复了$state完全引用（仅首次加载），修复了一些极端情况的bug。  
@@ -24,6 +30,7 @@
 * [局部状态模式](#part)
 * [全局页面周期](#lisener)
 * [全局方法](#f)
+* [non-writable解决方案](#nonWritable)
 * [Api说明](#api)
 * [总结及建议](#end)
 
@@ -244,6 +251,44 @@ Page({
   * 尽量封装复用率高的全局方法
   * 非交互型事件（即非bindxx）的公用方法，建议不写入Store中。写入App中更好。
 
+## <div id="nonWritable">non-writable解决方案</div>
+
+  收到开发者的反馈，在小程序中使用插件时，会报错提示:  
+  ```js
+   // [non-writable] modification of global variable "Page" is not allowed when using plugins at app.json.
+   // 在app.json中使用插件时，不允许修改全局变量 Page 
+  ```
+  原因是store源码重写了Page、Component方法。  
+  
+  ### 1、开启防改写
+  在你的store配置中，加入 `nonWritable: true`。  
+  ```js
+  let store = new Store({
+    nonWritable: true
+  })
+  ```
+  ### 2、创建页面与组件调整
+  将你所有页面与组件创建方法改为`App.Page(...) 和 App.Component(...)`。
+  ```js
+  //页面.js
+  const app = getApp()
+  App.Page({
+    data: {
+
+    },
+    onLoad: function () {
+    }
+  });
+
+  //组件.js
+  App.Component({
+    data: {
+
+    }
+  });
+  ```
+  以上就解决了此问题。
+
 
 ## <div id="api">api</div>
 这里列举了所有涉及到Store的属性与方法。
@@ -252,6 +297,9 @@ Page({
 参数options，为配置参数，
 options.state 为初始全局状态。
 options.methods 为全局方法。
+options.openPart 状态局部模式。
+options.pageLisener 周期监听
+options.nonWritable 是否重写Page，Componenet。
 
 ### Store.prototype.setState(Object data, Function callback)
 用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时完成），渲染为异步。

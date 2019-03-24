@@ -1,6 +1,6 @@
 const app = getApp()
 
-Page({
+App.Page({
   useStore: true,
   data: {
 
