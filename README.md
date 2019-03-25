@@ -39,11 +39,30 @@
 
 
 ### 1. 引入
-
-将本项目中util下的store.js复制到你的项目中，并在`app.js第一行`引入：
+目前有两种引入方式：
+#### npm
+ 首先你需要npm init 在项目目录下生成 package.json后，再进行安装。
+ ``` cmd
+ npm init
+ npm install wxministore -S
+ ```
+ 然后在微信小程序右上角详情中勾选 `使用npm模块`。  
+ 接着选择左上角 工具-构建 npm。 
+ 这样你就可以在项目中导入了。
+ 
+ ```js
+//app.js中
+import Store from 'wxministore';
+//或者 const Store = require('wxministore');
+App({
+})
+```
+#### clone
+如果不太熟悉npm没关系，你可以将本项目中util下的store.js复制到你的项目中，并在`app.js第一行`引入：
 ```js
 //app.js中
-const Store = require('util/store.js');
+import Store from './util/store.js';
+//或者 const Store = require('./util/store.js');
 App({
 })
 ```
