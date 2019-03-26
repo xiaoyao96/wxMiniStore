@@ -1,4 +1,5 @@
 # wxMiniStore
+[![NPM version](https://img.shields.io/npm/v/wxministore.svg)](https://www.npmjs.com/package/wxministore)
 
 一个基于原生小程序的mini全局状态管理库，五行代码即可引入。
 * 全局状态state支持所有Page和Component，状态完全同步，并提供api更新状态。
