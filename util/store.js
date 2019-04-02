@@ -84,7 +84,7 @@ function Store(option) {
         const originLife = o[key];
         o[key] = function () {
           pageLisener[key].apply(this, arguments);
-          originLife.apply(this, arguments);
+          originLife && originLife.apply(this, arguments);
         }
       }
     })
