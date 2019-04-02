@@ -9,6 +9,9 @@
 
 ## 更新日志
 
+### 1.2.2
+\[2019.4.2\] `F`: 修复pageLisener内部分周期执行时报错。
+
 ### 1.2.1
 \[2019.3.24\] `F`: 修复使用plugins插件时，提示non-writable错误。[(解决方案)](#nonWritable)。    
 \[2019.3.24\] `F`: 对Component中lifetimes字段的兼容。

@@ -27,6 +27,9 @@ let store = new Store({
   pageLisener: {
     onLoad(options){
       console.log('我在' + this.route, '参数为', options);
+    },
+    onHide(){
+      console.log('lalala')
     }
   },
   //开启了局部模式

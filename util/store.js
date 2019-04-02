@@ -1,9 +1,9 @@
 /**
  * @author 逍遥
  * @update 2019.3.24
- * @version 1.2.1
+ * @version 1.2.2
  */
-
+const Version = '1.2.2';
 const TYPE_ARRAY = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
 function Store(option) {
@@ -146,7 +146,7 @@ function Store(option) {
     try { Component = App.Component } catch (e) { }
   }
 
-  this.version = 1.2
+  this.version = Version;
 }
 
 Store.prototype.setState = function (obj, fn = () => { }) {
