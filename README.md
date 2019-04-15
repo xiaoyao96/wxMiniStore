@@ -2,7 +2,7 @@
 [![NPM version](https://img.shields.io/npm/v/wxministore.svg)](https://www.npmjs.com/package/wxministore)
 
 一个基于原生小程序的mini全局状态管理库，五行代码即可引入。
-* 全局状态state支持所有Page和Component，状态完全同步，并提供api更新状态。
+* 全局状态state支持所有Page和Component，状态完全同步，并提供api，自动diff状态并更新。
 * 周期监听pageLisener能监听所有页面的onLoad，onShow等周期事件。
 * 全局事件methods，全局可用的方法。
 * 适合原生小程序，可以随时引入，不影响原有的业务，拓展性强。
