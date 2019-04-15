@@ -1,12 +1,7 @@
 // component/text.js
 App.Component({
   useStore: true,
-  lifetimes: {
-    attached(){
-      console.log()
-      console.log(1)
-    }
-  },
+  useProp: ['list', 'user'],
   /**
    * 组件的属性列表
    */
@@ -18,7 +13,6 @@ App.Component({
    * 组件的初始数据
    */
   data: {
-    msg: 1
   },
 
   /**

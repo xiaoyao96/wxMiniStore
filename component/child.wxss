@@ -1,1 +1,5 @@
 /* component/text.wxss */
+.intro {
+  margin: 30px;
+  text-align: left;
+}
