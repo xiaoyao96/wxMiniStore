@@ -1,37 +1,38 @@
 /**
  * @author 逍遥
- * @update 2019.3.24
- * @version 1.2.2
+ * @update 2019.4.15
+ * @version 1.2.3
  */
-const Version = '1.2.2';
+const Version = '1.2.3';
 const TYPE_ARRAY = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
+
 function Store(option) {
   //必要参数的默认值处理
   const {
     state = {},
-    openPart = false,
-    behavior,
-    methods = {},
-    pageLisener = {},
-    nonWritable = false
+      openPart = false,
+      behavior,
+      methods = {},
+      pageLisener = {},
+      nonWritable = false
   } = option;
   //状态初始化
   this.$state = {};
   if (_typeOf(option.state) === TYPE_OBJECT) {
-    this.$state = Object.assign({}, option.state);
+    this.$state = Object.assign({}, _deepClone(option.state));
   }
   //页面+组件树
   this.$r = [];
   //创建时，添加组件
-  const _create = function (r) {
+  const _create = function(r) {
     _store.$r.push(r);
     r.setData({
       $state: _store.$state
     })
   }
   //销毁时，移除组件
-  const _destroy = function (r) {
+  const _destroy = function(r) {
     let index = _store.$r.findIndex(item => item === r);
     if (index > -1) {
       _store.$r.splice(index, 1)
@@ -42,7 +43,7 @@ function Store(option) {
   //其他参数
   const _store = this;
   const pageLife = ['data', 'onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap'];
-  const canUseStore = function (o) {
+  const canUseStore = function(o) {
     return (openPart === true && o.useStore === true) || !openPart;
   }
 
@@ -50,7 +51,7 @@ function Store(option) {
     originComponent = Component;
 
   //重写Page
-  App.Page = function (o, ...args) {
+  App.Page = function(o, ...args) {
     if (canUseStore(o)) {
       //状态注入
       o.data = Object.assign(o.data || {}, {
@@ -66,14 +67,14 @@ function Store(option) {
     })
     //覆盖原周期
     const originCreate = o.onLoad;
-    o.onLoad = function () {
+    o.onLoad = function() {
       if (canUseStore(o)) {
         _create(this);
       }
       originCreate && originCreate.apply(this, arguments)
     }
     const originonDestroy = o.onUnload;
-    o.onUnload = function () {
+    o.onUnload = function() {
       _destroy(this);
       originonDestroy && originonDestroy.apply(this, arguments)
     }
@@ -82,7 +83,7 @@ function Store(option) {
       //不能是周期事件
       if (typeof pageLisener[key] === 'function' && pageLife.some(item => item === key)) {
         const originLife = o[key];
-        o[key] = function () {
+        o[key] = function() {
           pageLisener[key].apply(this, arguments);
           originLife && originLife.apply(this, arguments);
         }
@@ -92,11 +93,13 @@ function Store(option) {
   }
 
   if (!nonWritable) {
-    try { Page = App.Page } catch (e) { }
+    try {
+      Page = App.Page
+    } catch (e) {}
   }
 
   //重写组件
-  App.Component = function (o, ...args) {
+  App.Component = function(o, ...args) {
     //状态注入
     if (canUseStore(o)) {
       o.data = Object.assign(o.data || {}, {
@@ -115,18 +118,20 @@ function Store(option) {
     if (behavior) {
       o.behaviors = [behavior, ...(o.behaviors || [])]
     }
-    const { lifetimes = {} } = o;
+    const {
+      lifetimes = {}
+    } = o;
 
     let originCreate = lifetimes.attached || o.attached,
       originonDestroy = lifetimes.detached || o.detached;
-    const attached = function () {
+    const attached = function() {
       if (canUseStore(o)) {
         _create(this);
       }
       originCreate && originCreate.apply(this, arguments)
     }
 
-    const detached = function () {
+    const detached = function() {
       _destroy(this);
       originonDestroy && originonDestroy.apply(this, arguments)
     }
@@ -143,47 +148,59 @@ function Store(option) {
     originComponent(o, ...args)
   }
   if (!nonWritable) {
-    try { Component = App.Component } catch (e) { }
+    try {
+      Component = App.Component
+    } catch (e) {}
   }
 
   this.version = Version;
 }
 
-Store.prototype.setState = function (obj, fn = () => { }) {
+Store.prototype.setState = function(obj, fn = () => {}) {
   if (_typeOf(obj) !== TYPE_OBJECT) {
     throw new Error('setState的第一个参数须为object!')
   }
   console.timeline && console.timeline('setState')
+  let prev = this.$state;
+  let current = setData(obj, prev);
+  this.$state = current;
+  //如果有组件
   if (this.$r.length > 0) {
-    const newObj = {}
-    Object.keys(obj).forEach(key => {
-      newObj['$state.' + key] = obj[key]
-    })
-    let pros = this.$r.map(item => {
-      return new Promise(r => {
-        item.setData(newObj, r)
+    let diffObj = diff(current, prev);
+    let keys = Object.keys(diffObj);
+    if (keys.length > 0) {
+      const newObj = {}
+      keys.forEach(key => {
+        newObj['$state.' + key] = diffObj[key]
       })
-    })
-    setData(obj, this.$state);
-    Promise.all(pros).then(fn);
+      let pros = this.$r.map(item => {
+        return new Promise(r => {
+          item.setData(newObj, r)
+        })
+      })
+      Promise.all(pros).then(fn);
+    } else {
+      fn();
+    }
   } else {
-    setData(obj, this.$state);
     fn();
   }
   console.timelineEnd && console.timelineEnd('setState')
 }
 
-const _typeOf = function (val) {
+const _typeOf = function(val) {
   return Object.prototype.toString.call(val)
 }
 
-const setData = function (obj, data) {
+const setData = function(obj, data) {
+  let result = _deepClone(data)
   Object.keys(obj).forEach(key => {
-    dataHandler(key, obj[key], data);
+    dataHandler(key, obj[key], result);
   })
+  return result
 }
 
-const dataHandler = function (key, result, data) {
+const dataHandler = function(key, result, data) {
   let arr = pathHandler(key);
   let d = data;
   for (let i = 0; i < arr.length - 1; i++) {
@@ -193,7 +210,7 @@ const dataHandler = function (key, result, data) {
   d[arr[arr.length - 1]] = result;
 }
 
-const pathHandler = function (key) {
+const pathHandler = function(key) {
   let current = '',
     keyArr = [];
   for (let i = 0, len = key.length; i < len; i++) {
@@ -210,14 +227,14 @@ const pathHandler = function (key) {
   return keyArr;
 }
 
-const cleanAndPush = function (key, arr) {
+const cleanAndPush = function(key, arr) {
   let r = cleanKey(key);
   if (r !== '') {
     arr.push(r)
   }
 }
 
-const keyToData = function (prev, current, data) {
+const keyToData = function(prev, current, data) {
   if (prev === '') {
     return
   }
@@ -229,7 +246,7 @@ const keyToData = function (prev, current, data) {
   }
 }
 
-const cleanKey = function (key) {
+const cleanKey = function(key) {
   if (key.match(/\[\S+\]/g)) {
     let result = key.replace(/\[|\]/g, '');
     if (!Number.isNaN(parseInt(result))) {
@@ -240,4 +257,68 @@ const cleanKey = function (key) {
   }
   return key.replace(/\[|\.|\]| /g, '')
 }
+
+const _deepClone = function(obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+
+/**
+ * diff算法
+ * @author 逍遥
+ */
+const addDiff = function addDiff(current = {}, prev = {}, root = '', result = {}) {
+  Object.entries(current).forEach(item => {
+    let key = item[0],
+      value = item[1],
+      path = root === '' ? key : root + '.' + key
+    if (_typeOf(current) === TYPE_ARRAY) {
+      path = root === '' ? key : root + '[' + key + ']'
+    }
+
+    if (!prev.hasOwnProperty(key)) {
+      result[path] = value
+    } else if (
+      (_typeOf(prev[key]) === TYPE_OBJECT &&
+        _typeOf(current[key]) === TYPE_OBJECT) ||
+      (_typeOf(prev[key]) === TYPE_ARRAY &&
+        _typeOf(current[key]) === TYPE_ARRAY)
+    ) {
+      addDiff(current[key], prev[key], path, result)
+    } else if (prev[key] !== current[key]) {
+      result[path] = value
+    }
+  })
+  return result
+}
+
+const nullDiff = function nullDiff(current = {}, prev = {}, root = '', result = {}) {
+  Object.entries(prev).forEach(item => {
+    let key = item[0],
+      value = item[1],
+      path = root === '' ? key : root + '.' + key
+    if (_typeOf(current) === TYPE_ARRAY) {
+      path = root === '' ? key : root + '[' + key + ']'
+    }
+
+    if (!current.hasOwnProperty(key)) {
+      result[path] = null
+    } else if (
+      (_typeOf(prev[key]) === TYPE_OBJECT &&
+        _typeOf(current[key]) === TYPE_OBJECT) ||
+      (_typeOf(prev[key]) === TYPE_ARRAY &&
+        _typeOf(current[key]) === TYPE_ARRAY)
+    ) {
+      nullDiff(current[key], prev[key], path, result)
+    }
+  })
+  return result
+}
+
+const diff = function diff(current = {}, prev = {}) {
+  let result = {}
+  addDiff(current, prev, '', result)
+  nullDiff(current, prev, '', result)
+  return result
+}
+
 module.exports = Store
