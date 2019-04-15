@@ -207,6 +207,7 @@ Store.prototype.setState = function(obj, fn = () => {}) {
   //如果有组件
   if (this.$r.length > 0) {
     let diffObj = diff(current, prev)
+    console.log('diff后实际设置的值：', diffObj)
     let keys = Object.keys(diffObj)
     if (keys.length > 0) {
       const newObj = {}
