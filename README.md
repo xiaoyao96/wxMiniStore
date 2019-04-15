@@ -8,9 +8,12 @@
 * 适合原生小程序，可以随时引入，不影响原有的业务，拓展性强。
 
 ## 更新日志
+### 1.2.3
+\[2019.4.15\] `A`: 新增组件/页面内 新增[useProp属性](#useProp)，指定当前组件/页面使用指定状态，提高性能。  
+\[2019.4.15\] `U`: store.setState加入diff算法，更加高效。  
 
 ### 1.2.2
-\[2019.4.2\] `F`: 修复pageLisener内部分周期执行时报错。
+\[2019.4.2\] `F`: 修复pageLisener内部分周期执行时报错。  
 
 ### 1.2.1
 \[2019.3.24\] `F`: 修复使用plugins插件时，提示non-writable错误。[(解决方案)](#nonWritable)。    
@@ -32,7 +35,7 @@
 * [开始](#start)  
 * [全局状态](#state)
 * [局部状态模式](#part)
-* [全局页面周期](#lisener)
+* [页面周期监听](#lisener)
 * [全局方法](#f)
 * [non-writable解决方案](#nonWritable)
 * [Api说明](#api)
@@ -112,12 +115,27 @@ App({
   <template is="t1" data="{{$state,arg1,arg2}}" />
 <!--   相当于<template is="t1" data="{{$state:$state,arg1:arg1,arg2:arg2}}" /> -->
 ```
+在版本1.2.1+建议使用App.Page和 App.Component创建页面和组件，当然也不是必须。详情查看[nonWritable](#nonWritable)
+``` js
+// 没问题
+Page({
+  //...
+})
+
+// 更好
+App.Page({
+  //...
+})
+
+```
+
 
 ### 5.如何修改状态
 js中使用app中的store来进行操作状态。具体参见下面api说明。
-```js
+
+``` js
 const app = getApp()
-Page({
+App.Page({
   data: {
 
   },
@@ -148,7 +166,7 @@ openPart 字段表示是否开启局部模式，默认值为false。当我们想
 在需要使用$state的组件中，加入`userStore: true`，表示当前页面或组件可用$state。
 ``` js
 // a.js
-Page({
+App.Page({
   useStore: true,
   onLoad(){
     console.log(this.data.$state) // { msg: '这是一个全局状态' }
@@ -157,7 +175,7 @@ Page({
 })
 
 // b.js
-Page({
+App.Page({
   onLoad(){
     console.log(this.data.$state) // undefined
     console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
@@ -179,6 +197,77 @@ b页面没有设置，所以为undefined，但两个页面均可通过store.$sta
 * 组件或页面.js中，我们建议使用getApp().store.$state去获取全局状态，因为他没有限制。
 * 仅在wxml中需要用到$state的页面和组件中开启useStore。
 
+
+## <div id="useProp"> 页面中useProp属性 `1.2.3+`</div>
+useProp 用于控制当前页面/组件，使用哪些状态，不传则所有状态均可在当前页面中使用。
+
+观察以下代码及注释：
+``` js
+// App.js
+let store = new Store({
+  state: {
+    s1: 's1状态',
+    s2: 's2状态'
+  }
+})
+
+// A页面中
+App.Page({
+  useProp: ['s1'], //指定使用s1
+  onLoad(){
+    console.log(this.data.$state) // { s1: 's1状态' }
+    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+  }
+})
+
+// B页面中
+App.Page({
+  useProp: ['s2'], //指定使用s2
+  onLoad(){
+    console.log(this.data.$state) // { s2: 's2状态' }
+    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+  }
+})
+
+// C页面中
+App.Page({
+  onLoad(){
+    console.log(this.data.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+  }
+})
+```
+useProp是控制哪些状态可用于当前组件/页面，而 状态局部模式 是控制哪些组件可共享state，两者可以同时作用。如：
+
+``` js
+// App.js中
+let store = new Store({
+  state: {
+    s1: 's1状态',
+    s2: 's2状态'
+  },
+  openPart: true
+})
+
+// A页面中
+App.Page({
+  useStore: true,
+  useProp: ['s1'], //指定使用s1
+  onLoad(){
+    console.log(this.data.$state) // { s1: 's1状态' }
+    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+  }
+})
+
+// B页面中
+App.Page({
+  useProp: ['s1'], //指定使用s2 但没设置useStore，所以无效
+  onLoad(){
+    console.log(this.data.$state) // undefined
+    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+  }
+})
+```
 
 
 ## <div id="lisener">周期监听 pageLisener</div>
@@ -210,7 +299,7 @@ let store = new Store({
 
 ```js
 // index/index.js 页面
-Page({
+App.Page({
     onLoad(){
         console.log(2)
     }
@@ -262,7 +351,7 @@ let store = new Store({
   ```
   在js中，直接使用 `this.方法名` 来调用:
   ```js
-Page({
+App.Page({
     onLoad(){
         this.sayHello();
     }
@@ -274,7 +363,7 @@ Page({
   * 尽量封装复用率高的全局方法
   * 非交互型事件（即非bindxx）的公用方法，建议不写入Store中。写入App中更好。
 
-## <div id="nonWritable">non-writable解决方案</div>
+## <div id="nonWritable">non-writable解决方案 `1.2.1+`</div>
 
   收到开发者的反馈，在小程序中使用插件时，会报错提示:  
   ```js
@@ -317,12 +406,12 @@ Page({
 这里列举了所有涉及到Store的属性与方法。
 ### new Store(options: Object) *已更新
 该函数使用new关键字返回一个Store类型的实例。
-参数options，为配置参数，
-options.state 为初始全局状态。
-options.methods 为全局方法。
-options.openPart 状态局部模式。
-options.pageLisener 周期监听
-options.nonWritable 是否重写Page，Componenet。
+参数options，为配置参数，  
+options.state 为初始全局状态。  
+options.methods 为全局方法。  
+options.openPart 状态局部模式。  
+options.pageLisener 周期监听。  
+options.nonWritable 是否重写Page，Componenet。  
 
 ### Store.prototype.setState(Object data, Function callback)
 用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时完成），渲染为异步。
