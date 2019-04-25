@@ -34,9 +34,11 @@
 ### 导航
 * [开始](#start)  
 * [全局状态](#state)
-* [局部状态模式](#part)
 * [页面周期监听](#lisener)
 * [全局方法](#f)
+* 性能优化
+  * [局部状态模式](#part)
+  * [useProp](#useProp)
 * [non-writable解决方案](#nonWritable)
 * [Api说明](#api)
 * [总结及建议](#end)
@@ -148,6 +150,100 @@ App.Page({
 });
 
 ```
+## <div id="lisener">周期监听 pageLisener</div>
+在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
+现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
+
+### 1.加入监听
+现在以监听onLoad为例， 在Store中新增一个pageLisener对象，将需要监听的周期写入:
+```js
+// store中
+let store = new Store({
+    //状态
+    state: {
+		//...
+    },
+    //方法
+    methods: {
+		//...
+    },
+    //页面监听
+    pageLisener: {
+        onLoad(options){
+            console.log('我在' + this.route, '参数为', options);
+        }
+    }
+})
+```
+就这样所有页面的onLoad，将会优先执行此监听。接下来看页面内代码：
+
+```js
+// index/index.js 页面
+App.Page({
+    onLoad(){
+        console.log(2)
+    }
+})
+```
+执行结果为:
+``` js
+// 我在index/index 参数为 {...} 
+// 2
+```
+### 2.没有第二步...
+总结：  
+* 先执行pageLisener监听，后执行原本页面中周期。
+* 还支持其他周期事件 ['onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
+
+## <div id="f">全局方法 methods</div>
+  新增methods，全局可使用。
+  适用于各个wxml中的交互事件(bindtap等), 你可以封装一些常用的交互事件，如 行为埋点，类型跳转等。
+  ### 1.创建一个全局方法
+  在原有状态基础上，新增一个methods对象，写入你的全局方法：
+  ```js
+let store = new Store({
+    //状态
+    state: {
+        msg: '这是一个全局状态'
+    },
+    //方法
+    methods: {
+        goAnyWhere(e){
+            wx.navigateTo({
+                url: e.currentTarget.dataset.url
+            })
+        },
+        sayHello(){
+            console.log('hello')
+        }
+    }
+})
+  ```
+  这里创建了一个全局封装的跳转 goAnyWhere。
+
+
+  ### 2.使用全局方法
+  在wxml中，直接使用`方法名`调用:
+  ```html
+<view bindtap="goAnyWhere" data-url="/index/index">
+    首页
+</view>
+  ```
+  在js中，直接使用 `this.方法名` 来调用:
+  ```js
+App.Page({
+    onLoad(){
+        this.sayHello();
+    }
+})
+  ```
+  在非页面的js中，我们不建议使用Store中的全局方法。但你可使用getCurrentPage().pop().sayHello() 来调用。
+
+  ### 3.说明
+  * 尽量封装复用率高的全局方法
+  * 非交互型事件（即非bindxx）的公用方法，建议不写入Store中。写入App中更好。
+
+
 ## <div id="part">状态局部模式</div>
 在项目的组件和页面越来越多且复用率越来越高时，全局$state的利用率就很低，这时候就出现了一种情况，页面中的组件和页面达到百千量级，每个内部都有一个$state，而用到它的可能就只有1个或几个。就会引起各种性能问题。比如更新$state十分缓慢，且低效。  
 这时候你需要将$state调整为部分组件和页面可用，而不是所有。
@@ -269,100 +365,6 @@ App.Page({
 })
 ```
 
-
-## <div id="lisener">周期监听 pageLisener</div>
-在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
-现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
-
-### 1.加入监听
-现在以监听onLoad为例， 在Store中新增一个pageLisener对象，将需要监听的周期写入:
-```js
-// store中
-let store = new Store({
-    //状态
-    state: {
-		//...
-    },
-    //方法
-    methods: {
-		//...
-    },
-    //页面监听
-    pageLisener: {
-        onLoad(options){
-            console.log('我在' + this.route, '参数为', options);
-        }
-    }
-})
-```
-就这样所有页面的onLoad，将会优先执行此监听。接下来看页面内代码：
-
-```js
-// index/index.js 页面
-App.Page({
-    onLoad(){
-        console.log(2)
-    }
-})
-```
-执行结果为:
-``` js
-// 我在index/index 参数为 {...} 
-// 2
-```
-### 2.没有第二步...
-总结：  
-* 先执行pageLisener监听，后执行原本页面中周期。
-* 还支持其他周期事件 ['onLoad', 'onShow', 'onReady', 'onHide', 'onUnload', 'onPullDownRefresh', 'onReachBottom', 'onShareAppMessage', 'onPageScroll', 'onTabItemTap']
-
-## <div id="f">全局方法 methods</div>
-  新增methods，全局可使用。
-  适用于各个wxml中的交互事件(bindtap等), 你可以封装一些常用的交互事件，如 行为埋点，类型跳转等。
-  ### 1.创建一个全局方法
-  在原有状态基础上，新增一个methods对象，写入你的全局方法：
-  ```js
-let store = new Store({
-    //状态
-    state: {
-        msg: '这是一个全局状态'
-    },
-    //方法
-    methods: {
-        goAnyWhere(e){
-            wx.navigateTo({
-                url: e.currentTarget.dataset.url
-            })
-        },
-        sayHello(){
-            console.log('hello')
-        }
-    }
-})
-  ```
-  这里创建了一个全局封装的跳转 goAnyWhere。
-
-
-  ### 2.使用全局方法
-  在wxml中，直接使用`方法名`调用:
-  ```html
-<view bindtap="goAnyWhere" data-url="/index/index">
-    首页
-</view>
-  ```
-  在js中，直接使用 `this.方法名` 来调用:
-  ```js
-App.Page({
-    onLoad(){
-        this.sayHello();
-    }
-})
-  ```
-  在非页面的js中，我们不建议使用Store中的全局方法。但你可使用getCurrentPage().pop().sayHello() 来调用。
-
-  ### 3.说明
-  * 尽量封装复用率高的全局方法
-  * 非交互型事件（即非bindxx）的公用方法，建议不写入Store中。写入App中更好。
-
 ## <div id="nonWritable">non-writable解决方案 `1.2.1+`</div>
 
   收到开发者的反馈，在小程序中使用插件时，会报错提示:  
@@ -414,7 +416,7 @@ options.pageLisener 周期监听。
 options.nonWritable 是否重写Page，Componenet。  
 
 ### Store.prototype.setState(Object data, Function callback)
-用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。在页面中调用setState的数据为同步，渲染为异步。在页面未加载完成时，调用setState的数据为异步（页面周期attached时完成），渲染为异步。
+用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。
 *提示：页面中应避免使用this.setData({\$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
 ### store.\$state : Object
