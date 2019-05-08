@@ -259,7 +259,7 @@ let store = new Store({
 ```
 openPart 字段表示是否开启局部模式，默认值为false。当我们想规定只有某些页面和组件使用$state时，就需开启此模式，设置为true。  
 ### 2.设置范围
-在需要使用$state的组件中，加入`userStore: true`，表示当前页面或组件可用$state。
+在需要使用$state的组件中，加入`useStore: true`，表示当前页面或组件可用$state。
 ``` js
 // a.js
 App.Page({
