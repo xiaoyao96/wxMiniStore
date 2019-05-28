@@ -79,9 +79,11 @@ App({
 Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
 ```js 
 let store = new Store({
-  //。
   state: {
-    msg: '这是一个全局状态'
+    msg: '这是一个全局状态',
+    user: {
+      name: "李四"
+    }
   }
 })
 console.log(store.$state.msg); //这是一个全局状态
