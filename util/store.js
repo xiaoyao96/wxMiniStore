@@ -1,6 +1,6 @@
 /**
  * @author 逍遥
- * @update 2019.6.25
+ * @update 2019.4.15
  * @version 1.2.5
  */
 const Version = '1.2.5'
@@ -207,7 +207,7 @@ Store.prototype.setState = function(obj, fn = () => {}) {
   //如果有组件
   if (this.$r.length > 0) {
     let diffObj = diff(current, prev)
-    console.log('diff后实际设置的值：', diffObj)
+    console.log('diff后实际设置的值：', _deepClone(diffObj))
     let keys = Object.keys(diffObj)
     if (keys.length > 0) {
       const newObj = {}
