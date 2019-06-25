@@ -200,7 +200,7 @@ Store.prototype.setState = function(obj, fn = () => {}) {
   if (_typeOf(obj) !== TYPE_OBJECT) {
     throw new Error('setState的第一个参数须为object!')
   }
-  console.timeline && console.timeline('setState')
+  console.time && console.time('setState')
   let prev = this.$state
   let current = setData(obj, prev)
   this.$state = current
@@ -240,7 +240,7 @@ Store.prototype.setState = function(obj, fn = () => {}) {
   } else {
     fn()
   }
-  console.timelineEnd && console.timelineEnd('setState')
+  console.timeEnd && console.timeEnd('setState')
 }
 
 const _filterKey = function(obj, useKeys = [], fn) {
