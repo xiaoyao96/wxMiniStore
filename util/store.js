@@ -1,9 +1,9 @@
 /**
  * @author 逍遥
- * @update 2019.4.15
- * @version 1.2.3
+ * @update 2019.6.25
+ * @version 1.2.5
  */
-const Version = '1.2.3'
+const Version = '1.2.5'
 const TYPE_ARRAY = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
 
@@ -263,8 +263,9 @@ const _typeOf = function(val) {
 
 const setData = function(obj, data) {
   let result = _deepClone(data)
-  Object.keys(obj).forEach(key => {
-    dataHandler(key, obj[key], result)
+  let origin = _deepClone(obj)
+  Object.keys(origin).forEach(key => {
+    dataHandler(key, origin[key], result)
   })
   return result
 }
