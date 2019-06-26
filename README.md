@@ -9,6 +9,9 @@
 
 ## 更新日志
 
+### 1.2.6
+\[2019.6.26\] `A`: 新增[store.prototype.getState](#state)，用于读取store.$state的拷贝，防止对原状态进行误操作。 
+
 ### 1.2.5
 \[2019.6.25\] `F`: 修复setState为引用类型数据时视图可能不会更新。
 
@@ -80,7 +83,8 @@ App({
 })
 ```
 ### <div id="state">2. 实例化一个全局状态 state</div>
-Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取请使用store.$state。
+Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取通过store.$state。 
+`1.2.6+`版本后可使用 store.getState() 读取状态。
 ```js 
 let store = new Store({
   state: {
@@ -91,6 +95,7 @@ let store = new Store({
   }
 })
 console.log(store.$state.msg); //这是一个全局状态
+console.log(store.getState().msg); //这是一个全局状态 1.2.6+
 App({
 })
 ```
@@ -426,11 +431,13 @@ options.nonWritable 是否重写Page，Componenet。
 *提示：页面中应避免使用this.setData({\$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
 ### store.\$state : Object
-该对象为实例.$state， 返回的是全局状态（1.2版完全引用）。应避免直接操作修改它。
+该对象为实例.$state， 返回的是全局状态，应避免直接操作修改它。
 
 ### store.$r : Object
 该对象为所有页面或组件的实例。  
 
+### store.getState() : Object `1.2.6+`
+该api返回的是全局状态的拷贝。
 
 ## <div id="end">总结及建议</div>
 考虑到后期的app.js内store不直观，可以把整套store单独写入一个js中，通过require引入。如：
