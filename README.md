@@ -38,7 +38,7 @@
 ## <div id="start">开始</div>
 
 
-### 1. <div id="start-1">安装及引入</div>
+### <div id="start-1">1.安装及引入</div>
 目前有两种引入方式：
 #### npm
  首先你需要npm init 在项目目录下生成 package.json后，再进行安装。
