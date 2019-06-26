@@ -146,12 +146,12 @@ App.Page({
 ```
 ### <div id="start-6">修改状态注意事项</div>
 ```js
-// 错误的示范
+// 错误的示范 视图不会更新
 let { user } = app.store.$state;
 user.name = '张三';
 app.store.setState({
   user
-});
+}); 
 
 //正确的示范
 let { user } = app.store.getState();
@@ -160,7 +160,7 @@ app.store.setState({
   user
 });
 ```
-获取全局状态推荐使用app.$state
+获取全局状态需使用app.store.getState()。
 
 ## <div id="lisener">周期监听 pageLisener</div>
 在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
