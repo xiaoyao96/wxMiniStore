@@ -39,8 +39,13 @@
 \[2018.10.30\] `A`:拓展新增功能[全局方法 methods字段](#f)，大幅优化setState性能。更新前需调整Store结构，请阅读[Store对象参数详情](#api)。  
 
 ### 导航
-* [开始](#start)  
-* [全局状态](#state)
+* [全局状态开始](#start)
+  * [安装及引入](#start-1)
+  * [实例化](#state)
+  * [App中注入](#start-3)
+  * [页面上使用](#start-4)
+  * [修改状态](#start-5)
+  * [修改状态注意事项](#start-6)
 * [页面周期监听](#lisener)
 * [全局方法](#f)
 * 性能优化
@@ -54,7 +59,7 @@
 ## <div id="start">开始</div>
 
 
-### 1. 引入
+### 1. <div id="start-1">安装及引入</div>
 目前有两种引入方式：
 #### npm
  首先你需要npm init 在项目目录下生成 package.json后，再进行安装。
@@ -83,8 +88,7 @@ App({
 })
 ```
 ### <div id="state">2. 实例化一个全局状态 state</div>
-Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取通过store.$state。  
-`1.2.6+`版本后可使用 store.getState() 读取状态。
+Store为构造函数，所以需要通过new 关键字实例化，参数为object类型，下面我们初始化一个state。  
 ```js 
 let store = new Store({
   state: {
@@ -94,12 +98,14 @@ let store = new Store({
     }
   }
 })
-console.log(store.$state.msg); //这是一个全局状态
 console.log(store.getState().msg); //这是一个全局状态 1.2.6+
+console.log(store.$state.msg); //这是一个全局状态 （不推荐）
 App({
 })
 ```
-### 3.在App中注入store
+初始化完成，我们如需在js中获取状态，可使用 `store.getState()` 获取全局状态，`1.2.6+`版本强烈推荐此方式。  
+store.$state 也可获取，但不建议使用。
+### <div id="start-3">3.在App中注入store</div>
 这么做是为了在其他页面中使用store。
 ```js
 App({
@@ -109,7 +115,7 @@ App({
   store: store
 })
 ```
-### 4.页面上使用
+### <div id="start-4">4.页面上使用</div>
 在所有wxml中，可使用$state.x。
 其中$state为全局状态的容器，里面包含了所有的全局状态。
 ```html
@@ -141,10 +147,8 @@ App.Page({
 })
 
 ```
-
-
-### 5.如何修改状态
-js中使用app中的store来进行操作状态。具体参见下面api说明。
+### <div id="start-5">5.如何修改状态</div>
+使用app.store.setState进行更新状态。如:
 
 ``` js
 const app = getApp()
@@ -161,6 +165,24 @@ App.Page({
 });
 
 ```
+### <div id="start-6">修改状态注意事项</div>
+```js
+// 错误的示范
+let { user } = app.store.$state;
+user.name = '张三';
+app.store.setState({
+  user
+});
+
+//正确的示范
+let { user } = app.store.getState();
+user.name = '张三';
+app.store.setState({
+  user
+});
+```
+获取全局状态推荐使用app.$state
+
 ## <div id="lisener">周期监听 pageLisener</div>
 在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
 现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
