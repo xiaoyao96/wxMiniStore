@@ -1,9 +1,9 @@
 /**
  * @author 逍遥
- * @update 2019.4.15
- * @version 1.2.5
+ * @update 2019.6.26
+ * @version 1.2.6
  */
-const Version = '1.2.5'
+const Version = '1.2.6'
 const TYPE_ARRAY = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
 
@@ -241,6 +241,10 @@ Store.prototype.setState = function(obj, fn = () => {}) {
     fn()
   }
   console.timeEnd && console.timeEnd('setState')
+}
+
+Store.prototype.getState = function(){
+  return _deepClone(this.$state);
 }
 
 const _filterKey = function(obj, useKeys = [], fn) {
