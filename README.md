@@ -83,7 +83,7 @@ App({
 })
 ```
 ### <div id="state">2. 实例化一个全局状态 state</div>
-Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取通过store.$state。 
+Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取通过store.$state。  
 `1.2.6+`版本后可使用 store.getState() 读取状态。
 ```js 
 let store = new Store({
