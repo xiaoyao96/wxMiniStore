@@ -278,7 +278,7 @@ App.Page({
   useStore: true,
   onLoad(){
     console.log(this.data.$state) // { msg: '这是一个全局状态' }
-    console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
+    console.log(getApp().store.getState()) // { msg: '这是一个全局状态' }
   }
 })
 
@@ -286,7 +286,7 @@ App.Page({
 App.Page({
   onLoad(){
     console.log(this.data.$state) // undefined
-    console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
+    console.log(getApp().store.getState()) // { msg: '这是一个全局状态' }
   }
 })
 ```
@@ -302,7 +302,7 @@ b页面没有设置，所以为undefined，但两个页面均可通过store.$sta
 
 ### 3.注意事项
 * openPart一旦开启，所有没有设置useStore的页面和组件将不能在wxml中使用$state。
-* 组件或页面.js中，我们建议使用getApp().store.$state去获取全局状态，因为他没有限制。
+* 组件或页面.js中，我们建议使用getApp().store.getState()去获取全局状态，因为他没有限制。
 * 仅在wxml中需要用到$state的页面和组件中开启useStore。
 
 
@@ -324,7 +324,7 @@ App.Page({
   useProp: ['s1'], //指定使用s1
   onLoad(){
     console.log(this.data.$state) // { s1: 's1状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 
@@ -333,7 +333,7 @@ App.Page({
   useProp: ['s2'], //指定使用s2
   onLoad(){
     console.log(this.data.$state) // { s2: 's2状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 
@@ -341,7 +341,7 @@ App.Page({
 App.Page({
   onLoad(){
     console.log(this.data.$state) // { s1: 's1状态', s2: 's2状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 ```
@@ -369,7 +369,7 @@ App.Page({
 
 // B页面中
 App.Page({
-  useProp: ['s1'], //指定使用s2 但没设置useStore，所以无效
+  useProp: ['s1'], //指定使用s1 但没设置useStore，所以无效
   onLoad(){
     console.log(this.data.$state) // undefined
     console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
