@@ -1,9 +1,9 @@
 /**
  * @author 逍遥
- * @update 2019.6.26
- * @version 1.2.6
+ * @update 2019.9.6
+ * @version 1.2.7
  */
-const Version = '1.2.6'
+const Version = '1.2.7'
 const TYPE_ARRAY = '[object Array]'
 const TYPE_OBJECT = '[object Object]'
 
