@@ -6,6 +6,9 @@ App.Page({
 
   },
   onLoad: function () {
-    console.log('获取得到，开启了useStore', this.data.$state)
+    // let { user } = app.store.getState();
+    app.store.setState({
+      user: {}
+    })
   }
 })

@@ -10,7 +10,11 @@ let store = new Store({
     //以下为自定义的全局状态，用法和页面中的data: {...} 一致。
     msg: 'Mini Store 是一个基于微信小程序的全局状态库。\n能够在Page，Component，template中任意wxml文件内使用全局状态。\n且全局的状态完全同步。',
     user: {
-      name: '逍遥'
+      name: '逍遥',
+      aa: {
+        x1: 1,
+        x2: 2
+      }
     }
   },
   methods: {

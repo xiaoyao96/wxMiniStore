@@ -355,7 +355,13 @@ const addDiff = function addDiff(
     }
 
     if (!prev.hasOwnProperty(key)) {
-      result[path] = value
+      if (_typeOf(current) === TYPE_ARRAY) {
+        let copyCurrent = _deepClone(current);
+        copyCurrent[key] = value;
+        result[root] = copyCurrent
+      } else {
+        result[path] = value
+      }
     } else if (
       (_typeOf(prev[key]) === TYPE_OBJECT &&
         _typeOf(current[key]) === TYPE_OBJECT) ||
@@ -385,7 +391,13 @@ const nullDiff = function nullDiff(
     }
 
     if (!current.hasOwnProperty(key)) {
-      result[path] = null
+      if (_typeOf(current) === TYPE_ARRAY) {
+        let copyCurrent = _deepClone(current);
+        copyCurrent.splice(key, 1)
+        result[root] = copyCurrent
+      }else{
+        result[path] = null
+      }
     } else if (
       (_typeOf(prev[key]) === TYPE_OBJECT &&
         _typeOf(current[key]) === TYPE_OBJECT) ||
