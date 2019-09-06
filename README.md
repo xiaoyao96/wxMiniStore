@@ -15,32 +15,16 @@
 ### 1.2.5
 \[2019.6.25\] `F`: 修复setState为引用类型数据时视图可能不会更新。
 
-### 1.2.3
-\[2019.4.15\] `A`: 组件/页面内 新增[useProp属性](#useProp)，指定当前组件/页面使用指定状态，提高性能。  
-\[2019.4.15\] `U`: store.setState加入diff算法，更加高效。  
-
-### 1.2.2
-\[2019.4.2\] `F`: 修复pageLisener内部分周期执行时报错。  
-
-### 1.2.1
-\[2019.3.24\] `F`: 修复使用plugins插件时，提示non-writable错误。[(解决方案)](#nonWritable)。    
-\[2019.3.24\] `F`: 对Component中lifetimes字段的兼容。
-
-
-### 1.2 
-\[2019.3.21\] `F`:测试发现小程序原生的setData会默认深拷贝目标对象。所以导致了#3，目前已修复，也说明了setState后，各个页面的$state不再是完全引用的关系。  
-\[2019.3.17\] `U`:不再支持es5，并重写源码(es6)，代码更少，做的更多，又恢复了$state完全引用（仅首次加载），修复了一些极端情况的bug。  
-
-
-### 1.1  
-\[2018.11.29\] `A`:新增[局部状态模式](#part), 可设置$state部分页面或组件可用，大幅提升性能。  
-\[2018.11.16\] `A`:支持es5。  
-\[2018.10.31\] `A`:拓展新增[周期监听 pageLisener字段](#lisener)，可监听所有页面的所有生命周期事件。  
-\[2018.10.30\] `A`:拓展新增功能[全局方法 methods字段](#f)，大幅优化setState性能。更新前需调整Store结构，请阅读[Store对象参数详情](#api)。  
+完整日志[点击此处查看](https://github.com/yx675258207/wxMiniStore/issues/9)
 
 ### 导航
-* [开始](#start)  
-* [全局状态](#state)
+* [全局状态开始](#start)
+  * [安装及引入](#start-1)
+  * [实例化](#state)
+  * [App中注入](#start-3)
+  * [页面上使用](#start-4)
+  * [修改状态](#start-5)
+  * [修改状态注意事项](#start-6)
 * [页面周期监听](#lisener)
 * [全局方法](#f)
 * 性能优化
@@ -54,7 +38,7 @@
 ## <div id="start">开始</div>
 
 
-### 1. 引入
+### <div id="start-1">1.安装及引入</div>
 目前有两种引入方式：
 #### npm
  首先你需要npm init 在项目目录下生成 package.json后，再进行安装。
@@ -83,8 +67,7 @@ App({
 })
 ```
 ### <div id="state">2. 实例化一个全局状态 state</div>
-Store 允许传一个参数，类型为Object，全局状态写入对象state中，读取通过store.$state。  
-`1.2.6+`版本后可使用 store.getState() 读取状态。
+Store为构造函数，所以需要通过new 关键字实例化，参数为object类型，下面我们初始化一个state。  
 ```js 
 let store = new Store({
   state: {
@@ -94,12 +77,14 @@ let store = new Store({
     }
   }
 })
-console.log(store.$state.msg); //这是一个全局状态
 console.log(store.getState().msg); //这是一个全局状态 1.2.6+
+console.log(store.$state.msg); //这是一个全局状态 （不推荐）
 App({
 })
 ```
-### 3.在App中注入store
+初始化完成，我们如需在js中获取状态，可使用 `store.getState()` 获取全局状态，`1.2.6+`版本强烈推荐此方式。  
+store.$state 也可获取，但不建议使用。
+### <div id="start-3">3.在App中注入store</div>
 这么做是为了在其他页面中使用store。
 ```js
 App({
@@ -109,7 +94,7 @@ App({
   store: store
 })
 ```
-### 4.页面上使用
+### <div id="start-4">4.页面上使用</div>
 在所有wxml中，可使用$state.x。
 其中$state为全局状态的容器，里面包含了所有的全局状态。
 ```html
@@ -141,10 +126,8 @@ App.Page({
 })
 
 ```
-
-
-### 5.如何修改状态
-js中使用app中的store来进行操作状态。具体参见下面api说明。
+### <div id="start-5">5.如何修改状态</div>
+使用app.store.setState进行更新状态。如:
 
 ``` js
 const app = getApp()
@@ -161,6 +144,24 @@ App.Page({
 });
 
 ```
+### <div id="start-6">修改状态注意事项</div>
+```js
+// 错误的示范 视图不会更新
+let { user } = app.store.$state;
+user.name = '张三';
+app.store.setState({
+  user
+}); 
+
+//正确的示范
+let { user } = app.store.getState();
+user.name = '张三';
+app.store.setState({
+  user
+});
+```
+获取全局状态需使用app.store.getState()。
+
 ## <div id="lisener">周期监听 pageLisener</div>
 在有的场景，我希望每个页面在onLoad时执行一个方法（如统计页面，监听等）。原本做法是一个一个的复制粘贴，很麻烦。  
 现在我们可以把某个周期，写入pageLisener中，Store会自动在`相应周期优先执行pageLisnner然后再执行原页面周期内事件`。
@@ -277,7 +278,7 @@ App.Page({
   useStore: true,
   onLoad(){
     console.log(this.data.$state) // { msg: '这是一个全局状态' }
-    console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
+    console.log(getApp().store.getState()) // { msg: '这是一个全局状态' }
   }
 })
 
@@ -285,7 +286,7 @@ App.Page({
 App.Page({
   onLoad(){
     console.log(this.data.$state) // undefined
-    console.log(getApp().store.$state) // { msg: '这是一个全局状态' }
+    console.log(getApp().store.getState()) // { msg: '这是一个全局状态' }
   }
 })
 ```
@@ -301,7 +302,7 @@ b页面没有设置，所以为undefined，但两个页面均可通过store.$sta
 
 ### 3.注意事项
 * openPart一旦开启，所有没有设置useStore的页面和组件将不能在wxml中使用$state。
-* 组件或页面.js中，我们建议使用getApp().store.$state去获取全局状态，因为他没有限制。
+* 组件或页面.js中，我们建议使用getApp().store.getState()去获取全局状态，因为他没有限制。
 * 仅在wxml中需要用到$state的页面和组件中开启useStore。
 
 
@@ -323,7 +324,7 @@ App.Page({
   useProp: ['s1'], //指定使用s1
   onLoad(){
     console.log(this.data.$state) // { s1: 's1状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 
@@ -332,7 +333,7 @@ App.Page({
   useProp: ['s2'], //指定使用s2
   onLoad(){
     console.log(this.data.$state) // { s2: 's2状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 
@@ -340,7 +341,7 @@ App.Page({
 App.Page({
   onLoad(){
     console.log(this.data.$state) // { s1: 's1状态', s2: 's2状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 ```
@@ -368,7 +369,7 @@ App.Page({
 
 // B页面中
 App.Page({
-  useProp: ['s1'], //指定使用s2 但没设置useStore，所以无效
+  useProp: ['s1'], //指定使用s1 但没设置useStore，所以无效
   onLoad(){
     console.log(this.data.$state) // undefined
     console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
