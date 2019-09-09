@@ -292,7 +292,7 @@ App.Page({
 })
 ```
 a页面设置了Store可用，所以可以通过this.data.$state获取。
-b页面没有设置，所以为undefined，但两个页面均可通过store.$state获取。
+b页面没有设置，所以为undefined，但两个页面均可通过store.getState()读取全局状态。
 ``` html
 <--! a页面有效 -->
 <view>{{$state.msg}}</view>
@@ -364,7 +364,7 @@ App.Page({
   useProp: ['s1'], //指定使用s1
   onLoad(){
     console.log(this.data.$state) // { s1: 's1状态' }
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 
@@ -373,7 +373,7 @@ App.Page({
   useProp: ['s1'], //指定使用s1 但没设置useStore，所以无效
   onLoad(){
     console.log(this.data.$state) // undefined
-    console.log(getApp().store.$state) // { s1: 's1状态', s2: 's2状态' }
+    console.log(getApp().store.getState()) // { s1: 's1状态', s2: 's2状态' }
   }
 })
 ```
