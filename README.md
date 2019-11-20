@@ -398,7 +398,6 @@ App.Page({
   将你所有页面与组件创建方法改为`App.Page(...) 和 App.Component(...)`。
   ```js
   //页面.js
-  const app = getApp()
   App.Page({
     data: {
 
