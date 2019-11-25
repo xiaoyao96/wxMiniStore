@@ -6,9 +6,5 @@ App.Page({
 
   },
   onLoad: function () {
-    // let { user } = app.store.getState();
-    app.store.setState({
-      user: {}
-    })
   }
 })

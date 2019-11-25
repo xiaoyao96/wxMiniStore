@@ -1,34 +1,20 @@
 {
-	"description": "项目配置文件",
+	"description": "项目配置文件。",
 	"packOptions": {
 		"ignore": []
 	},
 	"setting": {
 		"urlCheck": false,
 		"es6": true,
-		"enhance": true,
 		"postcss": true,
 		"minified": true,
 		"newFeature": true,
-		"autoAudits": false,
-		"checkInvalidKey": true,
-		"checkSiteMap": true,
-		"uploadWithSourceMap": true,
-		"babelSetting": {
-			"ignore": [],
-			"disablePlugins": [],
-			"outputPath": ""
-		}
+		"autoAudits": false
 	},
 	"compileType": "miniprogram",
 	"libVersion": "2.2.4",
 	"appid": "wx3644c78798077537",
-	"projectname": "store%E7%A4%BA%E4%BE%8B",
-	"cloudfunctionTemplateRoot": "",
-	"debugOptions": {
-		"hidedInDevtools": []
-	},
-	"scripts": {},
+	"projectname": "store-demo",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
 	"condition": {
@@ -40,15 +26,8 @@
 			"current": -1,
 			"list": []
 		},
-		"plugin": {
-			"current": -1,
-			"list": []
-		},
 		"game": {
-			"list": []
-		},
-		"gamePlugin": {
-			"current": -1,
+			"currentL": -1,
 			"list": []
 		},
 		"miniprogram": {

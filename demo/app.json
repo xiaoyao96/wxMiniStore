@@ -1,7 +1,8 @@
 {
   "pages": [
     "index/index",
-    "detail/detail"
+    "detail/detail",
+    "counter/counter"
   ],
   "window": {
     "backgroundTextStyle": "light",

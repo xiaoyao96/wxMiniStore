@@ -1,6 +1,5 @@
 <!--component/text.wxml-->
 <view>
-  <view>我是一个子组件，这是全局的用户信息：</view>
-  <view>我叫{{$state.user.name}}</view>
+  <view>{{$state.user.name}}：</view>
   <view wx:for="{{$state.list}}" class="intro">{{item.step}}：{{item.value}}</view>
 </view>

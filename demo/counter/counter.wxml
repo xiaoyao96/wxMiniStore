@@ -1,0 +1,5 @@
+<!--counter/counter.wxml-->
+<text>{{$state.counter}}</text>
+<button bindtap="increase">+</button>
+<button bindtap="decrease">-</button>
+<text>次数状态与首页保持同步</text>

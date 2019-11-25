@@ -1,0 +1,24 @@
+{
+  "name": "wxministore",
+  "version": "1.2.71",
+  "description": "小程序全局状态管理工具",
+  "main": "./lib/store.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yx675258207/wxMiniStore.git"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "store",
+    "wxstore",
+    "wxministore"
+  ],
+  "author": "Leisure",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yx675258207/wxMiniStore/issues"
+  },
+  "homepage": "https://github.com/yx675258207/wxMiniStore#readme"
+}

@@ -7,6 +7,10 @@
 <button bindtap='goAnyWhere' data-url='/detail/detail'>
   开始
 </button>
+<button bindtap='goAnyWhere' data-url='/counter/counter'>
+  查看计数器例子
+</button>
+<text>当前：{{$state.counter}}</text>
 
 <view wx:for="{{$state.list}}">
   {{item.name}}
