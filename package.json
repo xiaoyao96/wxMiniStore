@@ -7,6 +7,11 @@
     "type": "git",
     "url": "git+https://github.com/yx675258207/wxMiniStore.git"
   },
+  "scripts": {
+    "start": "rollup -c -w",
+    "build": "rollup -c",
+    "test": "mocha --require babel-core/register ./test/diff.test.js"
+  },
   "files": [
     "lib"
   ],
@@ -20,5 +25,18 @@
   "bugs": {
     "url": "https://github.com/yx675258207/wxMiniStore/issues"
   },
-  "homepage": "https://github.com/yx675258207/wxMiniStore#readme"
+  "homepage": "https://github.com/yx675258207/wxMiniStore#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "rollup": "^1.27.5",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-uglify": "^6.0.3"
+  }
 }
