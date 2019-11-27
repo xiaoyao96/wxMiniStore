@@ -469,4 +469,4 @@ MiniStore非常适合原生小程序。可以随时引入，不影响原有的�
 
 ## License
 
-© [Leisure](https://github.com/yx675258207)
+MIT © [Leisure](https://github.com/yx675258207)
