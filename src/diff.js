@@ -1,4 +1,4 @@
-import { _typeOf, _deepClone, TYPE_ARRAY, TYPE_OBJECT } from "./common";
+import { _typeOf, TYPE_ARRAY, TYPE_OBJECT } from "./common";
 /**
  * diff库
  * @author Leisure
@@ -19,6 +19,10 @@ const updateDiff = function updateDiff(
   root = "",
   result = {}
 ) {
+  if(_typeOf(current) === TYPE_ARRAY && ((_typeOf(prev) === TYPE_ARRAY && current.length !== prev.length) || _typeOf(prev) !== TYPE_ARRAY)){
+    result[root] = current
+    return;
+  }
   Object.entries(current).forEach(item => {
     let key = item[0],
       value = item[1],
@@ -26,20 +30,8 @@ const updateDiff = function updateDiff(
     if (_typeOf(current) === TYPE_ARRAY) {
       path = root === "" ? key : root + "[" + key + "]";
     }
-
     if (!prev.hasOwnProperty(key)) {
-      if (_typeOf(current) === TYPE_ARRAY) {
-        let copyCurrent = _deepClone(current);
-        copyCurrent[key] = value;
-        Object.keys(result).forEach(rk => {
-          if (~rk.indexOf(root + "[") || ~rk.indexOf(root + ".")) {
-            delete result[rk];
-          }
-        });
-        result[root] = copyCurrent;
-      } else {
-        result[path] = value;
-      }
+      result[path] = value;
     } else if (
       (_typeOf(prev[key]) === TYPE_OBJECT &&
         _typeOf(current[key]) === TYPE_OBJECT) ||
@@ -60,6 +52,9 @@ const nullDiff = function nullDiff(
   root = "",
   result = {}
 ) {
+  if(_typeOf(current) === TYPE_ARRAY && ((_typeOf(prev) === TYPE_ARRAY && current.length !== prev.length) || _typeOf(prev) !== TYPE_ARRAY)){
+    return;
+  }
   Object.entries(prev).forEach(item => {
     let key = item[0],
       path = root === "" ? key : root + "." + key;
@@ -68,18 +63,7 @@ const nullDiff = function nullDiff(
     }
 
     if (!current.hasOwnProperty(key)) {
-      if (_typeOf(current) === TYPE_ARRAY) {
-        let copyCurrent = _deepClone(current);
-        copyCurrent.splice(key, 1);
-        Object.keys(result).forEach(rk => {
-          if (~rk.indexOf(root + "[") || ~rk.indexOf(root + ".")) {
-            delete result[rk];
-          }
-        });
-        result[root] = copyCurrent;
-      } else {
-        result[path] = null;
-      }
+      result[path] = null;
     } else if (
       (_typeOf(prev[key]) === TYPE_OBJECT &&
         _typeOf(current[key]) === TYPE_OBJECT) ||

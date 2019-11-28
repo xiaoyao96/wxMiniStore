@@ -1,6 +1,8 @@
 import { _typeOf, _deepClone, TYPE_ARRAY, TYPE_OBJECT } from "./common";
 import diff from "./diff";
-const Version = "1.2.8";
+import pkg from "../package.json";
+const Version = pkg.version;
+console.log("当前wxministore版本：" + Version);
 /**
  * Store
  * @author Leisure

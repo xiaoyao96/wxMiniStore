@@ -2,6 +2,7 @@ import babel from "rollup-plugin-babel";
 import commonjs from "rollup-plugin-commonjs";
 import resolve from "rollup-plugin-node-resolve";
 import { uglify } from "rollup-plugin-uglify";
+import json from "@rollup/plugin-json";
 import pkg from "./package.json";
 
 export default {
@@ -14,6 +15,7 @@ export default {
     }
   ],
   plugins: [
+    json(),
     babel({
       babelrc: false,
       exclude: "node_modules/**",
@@ -21,7 +23,7 @@ export default {
         [
           "es2015",
           {
-            "modules": false
+            modules: false
           }
         ],
         "stage-0"
