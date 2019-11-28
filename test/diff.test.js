@@ -305,3 +305,38 @@ describe("测试diff库数组对象", () => {
 
 
 });
+
+
+describe('测试不同类型diff', () => {
+  it('测试数字和字符串', () => {
+    let prev = {
+      a: 1
+    }
+    let current = {
+      a: '1'
+    }
+    expect(diff(current, prev)).to.be.deep.equal({
+      a: '1'
+    })
+  })
+  it('测试原始类型和对象', () => {
+    let prev = {
+      a: 1
+    }
+    let current = {
+      a: {}
+    }
+    expect(diff(current, prev)).to.be.deep.equal({
+      a: {}
+    })
+    let prev1 = {
+      a: 1
+    }
+    let current1 = {
+      a: []
+    }
+    expect(diff(current1, prev1)).to.be.deep.equal({
+      a: []
+    })
+  })
+})
