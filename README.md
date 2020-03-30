@@ -128,8 +128,9 @@ Page({
 App.Page({
   //...
 })
-
 ```
+如果使用时，页面空白，说明你没有在App创建前new Store。  
+
 ### <div id="start-5">5.如何修改状态</div>
 使用app.store.setState进行更新状态。如:
 
