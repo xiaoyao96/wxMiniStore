@@ -6,8 +6,8 @@ console.log("当前wxministore版本：" + Version);
 /**
  * Store
  * @author Leisure
- * @update 2019.11.27
- * @version 1.2.8
+ * @update 2020.3.31
+ * @version 1.2.9
  */
 class Store {
   version = Version;
@@ -20,9 +20,10 @@ class Store {
       behavior,
       methods = {},
       pageLisener = {},
-      nonWritable = false
+      nonWritable = false,
+      debug = true
     } = option;
-
+    this.debug = debug;
     //状态初始化
     this.$state = {};
     if (_typeOf(option.state) === TYPE_OBJECT) {
@@ -205,14 +206,14 @@ class Store {
     if (_typeOf(obj) !== TYPE_OBJECT) {
       throw new Error("setState的第一个参数须为object!");
     }
-    console.time && console.time("setState");
+    this.debug && console.time && console.time("setState");
     let prev = this.$state;
     let current = setData(obj, prev);
     this.$state = current;
     //如果有组件
     if (this.$r.length > 0) {
       let diffObj = diff(current, prev);
-      console.log("diff后实际设置的值：", _deepClone(diffObj));
+      this.debug && console.log("diff后实际设置的值：", _deepClone(diffObj));
       let keys = Object.keys(diffObj);
       if (keys.length > 0) {
         const newObj = {};
@@ -247,7 +248,7 @@ class Store {
     } else {
       fn();
     }
-    console.timeEnd && console.timeEnd("setState");
+    this.debug && console.timeEnd && console.timeEnd("setState");
   }
   getState() {
     return _deepClone(this.$state);

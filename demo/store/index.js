@@ -24,6 +24,6 @@ export default new Store({
       console.log('lalala')
     }
   },
-  //开启了局部模式
+  // 开启了局部模式
   openPart: true
 })

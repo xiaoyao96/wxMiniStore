@@ -1,6 +1,6 @@
 {
   "name": "wxministore",
-  "version": "1.2.81",
+  "version": "1.2.9",
   "description": "小程序全局状态管理工具",
   "main": "./lib/store.js",
   "repository": {
