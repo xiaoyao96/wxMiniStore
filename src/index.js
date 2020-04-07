@@ -253,6 +253,28 @@ class Store {
   getState() {
     return _deepClone(this.$state);
   }
+  clearState(fn = () => {}) {
+    this.debug && console.time && console.time("setState");
+    let current = {};
+    this.$state = current;
+    //如果有组件
+    if (this.$r.length > 0) {
+      let diffObj = {};
+      this.debug && console.log("diff后实际设置的值：", diffObj);
+      let pros = this.$r.map((r) => {
+        let newObj = {
+          $state: null
+        };
+        return new Promise((resolve) => {
+          r.setData(newObj, resolve);
+        });
+      });
+      Promise.all(pros).then(fn);
+    } else {
+      fn();
+    }
+    this.debug && console.timeEnd && console.timeEnd("clearState");
+  }
 }
 
 const _filterKey = function(obj, useKeys = [], fn) {
