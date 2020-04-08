@@ -458,6 +458,9 @@ options.nonWritable 是否重写Page，Componenet。
 ### store.getState() : Object `1.2.6+`
 该api返回的是全局状态的拷贝。
 
+### store.clearState(Function callback)
+用于清空全局状态。
+
 ## <div id="end">总结及建议</div>
 考虑到后期的app.js内store不直观，可以把整套store单独写入一个js中，通过require引入。如：
   ``` js
