@@ -254,16 +254,14 @@ class Store {
     return _deepClone(this.$state);
   }
   clearState(fn = () => {}) {
-    this.debug && console.time && console.time("setState");
+    this.debug && console.time && console.time("clearState");
     let current = {};
     this.$state = current;
     //如果有组件
     if (this.$r.length > 0) {
-      let diffObj = {};
-      this.debug && console.log("diff后实际设置的值：", diffObj);
       let pros = this.$r.map((r) => {
         let newObj = {
-          $state: null
+          $state: {}
         };
         return new Promise((resolve) => {
           r.setData(newObj, resolve);

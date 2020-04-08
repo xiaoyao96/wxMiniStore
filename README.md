@@ -445,20 +445,20 @@ options.openPart 状态局部模式。
 options.pageLisener 周期监听。  
 options.nonWritable 是否重写Page，Componenet。  
 
-### Store.prototype.setState(Object data, Function callback)
+### store.setState(data: Object, callback: Function)
 用于修改全局状态，用法与微信小程序的 Page.prototype.setData完全一致。
 *提示：页面中应避免使用this.setData({\$state: ...})去操作当前页面下的$state。如有相关需求，请使用页面其他状态存储。*
 
-### store.\$state : Object
+### store.\$state: Object
 该对象为实例.$state， 返回的是全局状态，应避免直接操作修改它。
 
-### store.$r : Object
+### store.\$r: Array
 该对象为所有页面或组件的实例。  
 
-### store.getState() : Object `1.2.6+`
+### store.getState: () => Object `1.2.6+`
 该api返回的是全局状态的拷贝。
 
-### store.clearState(Function callback)
+### store.clearState(callback: Function)
 用于清空全局状态。
 
 ## <div id="end">总结及建议</div>
