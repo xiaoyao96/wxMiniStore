@@ -3,10 +3,10 @@
 [![License](https://img.shields.io/npm/l/wxministore.svg)](https://www.npmjs.com/package/wxministore)
 
 一个基于原生小程序的mini全局状态管理库，跨页面/组件渲染。
-* 全局状态state支持所有Page和Component，状态完全同步，并提供api，自动diff状态并更新。
-* 周期监听pageLisener能监听所有页面的onLoad，onShow等周期事件。
-* 全局事件methods，全局可用的方法。
-* 适合原生小程序，可以随时引入，不影响原有的业务，拓展性强。
+* 全局状态state支持所有Page和Component，状态完全同步渲染，并支持更新，更新时使用独有diff能力，性能更强。
+* 周期监听pageLisener能监听所有页面的onLoad、onShow等周期事件，方便埋点、统计等行为。
+* 全局事件methods，一处声明，所有wxml直接可用的函数。
+* 适合原生小程序，即使后期引入，也只需增加几行代码。
 
 ## 更新日志
 ### 1.2.9
