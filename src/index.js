@@ -1,13 +1,15 @@
 import { _typeOf, _deepClone, TYPE_ARRAY, TYPE_OBJECT } from "./common";
 import diff from "./diff";
 import pkg from "../package.json";
+import "./polyfill";
+
 const Version = pkg.version;
 console.log("当前wxministore版本：" + Version);
 /**
  * Store
  * @author Leisure
- * @update 2020.3.31
- * @version 1.2.9
+ * @update 2020.7.28
+ * @version 1.3.0
  */
 class Store {
   version = Version;
@@ -15,24 +17,26 @@ class Store {
   $r = [];
   constructor(option) {
     //必要参数的默认值处理
-    const {
+    let {
       openPart = false,
       behavior,
       methods = {},
       pageLisener = {},
+      pageListener,
       nonWritable = false,
-      debug = true
+      debug = true,
     } = option;
+    pageListener = pageListener || pageLisener;
     this.debug = debug;
     //状态初始化
     this.$state = {};
     if (_typeOf(option.state) === TYPE_OBJECT) {
-      this.$state = Object.assign({}, _deepClone(option.state));
+      this.$state = _deepClone(option.state);
     }
     //页面+组件树
     this.$r = [];
     //创建时，添加组件
-    const _create = function(r, o = {}) {
+    const _create = function (r, o = {}) {
       r.$store = {};
       const { useProp } = o;
       if (o.hasOwnProperty("useProp")) {
@@ -55,18 +59,18 @@ class Store {
               _store.$state,
               r.$store.useProp,
               (key, usekey) => key === usekey
-            )
+            ),
           });
         } else {
           r.setData({
-            $state: _store.$state
+            $state: _store.$state,
           });
         }
       }
     };
     //销毁时，移除组件
-    const _destroy = function(r) {
-      let index = _store.$r.findIndex(item => item === r);
+    const _destroy = function (r) {
+      let index = _store.$r.findIndex((item) => item === r);
       if (index > -1) {
         _store.$r.splice(index, 1);
       }
@@ -86,9 +90,9 @@ class Store {
       "onReachBottom",
       "onShareAppMessage",
       "onPageScroll",
-      "onTabItemTap"
+      "onTabItemTap",
     ];
-    const canUseStore = function(o = {}) {
+    const canUseStore = function (o = {}) {
       return (openPart === true && o.useStore === true) || !openPart;
     };
 
@@ -96,44 +100,45 @@ class Store {
       originComponent = Component;
 
     //重写Page
-    App.Page = function(o = {}, ...args) {
+    App.Page = function (o = {}, ...args) {
       if (canUseStore(o)) {
         //状态注入
-        o.data = Object.assign(o.data || {}, {
-          $state: _store.$state
-        });
+        o.data = {
+          ...(o.data || {}),
+          $state: _store.$state,
+        };
       }
       //行为注入
-      Object.keys(methods).forEach(key => {
+      Object.keys(methods).forEach((key) => {
         //不能是周期事件
         if (
           typeof methods[key] === "function" &&
-          !pageLife.some(item => item === key)
+          !pageLife.some((item) => item === key)
         ) {
           o[key] = methods[key];
         }
       });
       //覆盖原周期
       const originCreate = o.onLoad;
-      o.onLoad = function() {
+      o.onLoad = function () {
         _create(this, o);
         originCreate && originCreate.apply(this, arguments);
       };
       const originonDestroy = o.onUnload;
-      o.onUnload = function() {
+      o.onUnload = function () {
         _destroy(this);
         originonDestroy && originonDestroy.apply(this, arguments);
       };
       //其他页面周期事件注入 pageListener
-      Object.keys(pageLisener).forEach(key => {
+      Object.keys(pageListener).forEach((key) => {
         //不能是周期事件
         if (
-          typeof pageLisener[key] === "function" &&
-          pageLife.some(item => item === key)
+          typeof pageListener[key] === "function" &&
+          pageLife.some((item) => item === key)
         ) {
           const originLife = o[key];
-          o[key] = function() {
-            pageLisener[key].apply(this, arguments);
+          o[key] = function () {
+            pageListener[key].apply(this, arguments);
             originLife && originLife.apply(this, arguments);
           };
         }
@@ -148,19 +153,20 @@ class Store {
     }
 
     //重写组件
-    App.Component = function(o = {}, ...args) {
+    App.Component = function (o = {}, ...args) {
       //状态注入
       if (canUseStore(o)) {
-        o.data = Object.assign(o.data || {}, {
-          $state: _store.$state
-        });
+        o.data = {
+          ...(o.data || {}),
+          $state: _store.$state,
+        };
       }
       //行为注入
-      Object.keys(methods).forEach(key => {
+      Object.keys(methods).forEach((key) => {
         //不能是周期事件
         if (
           typeof methods[key] === "function" &&
-          !pageLife.some(item => item === key)
+          !pageLife.some((item) => item === key)
         ) {
           o.methods || (o.methods = {});
           o.methods[key] = methods[key];
@@ -174,12 +180,12 @@ class Store {
 
       let originCreate = lifetimes.attached || o.attached,
         originonDestroy = lifetimes.detached || o.detached;
-      const attached = function() {
+      const attached = function () {
         _create(this, o);
         originCreate && originCreate.apply(this, arguments);
       };
 
-      const detached = function() {
+      const detached = function () {
         _destroy(this);
         originonDestroy && originonDestroy.apply(this, arguments);
       };
@@ -217,10 +223,10 @@ class Store {
       let keys = Object.keys(diffObj);
       if (keys.length > 0) {
         const newObj = {};
-        keys.forEach(key => {
+        keys.forEach((key) => {
           newObj["$state." + key] = diffObj[key];
         });
-        let pros = this.$r.map(r => {
+        let pros = this.$r.map((r) => {
           if (r.$store.hasOwnProperty("useProp")) {
             let useprops = _filterKey(
               newObj,
@@ -230,14 +236,14 @@ class Store {
                 !!key.match(new RegExp("^[$]state." + useKey + "[.|[]", "g"))
             );
             if (Object.keys(useprops).length > 0) {
-              return new Promise(resolve => {
+              return new Promise((resolve) => {
                 r.setData(useprops, resolve);
               });
             } else {
               return Promise.resolve();
             }
           }
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             r.setData(newObj, resolve);
           });
         });
@@ -261,7 +267,7 @@ class Store {
     if (this.$r.length > 0) {
       let pros = this.$r.map((r) => {
         let newObj = {
-          $state: {}
+          $state: {},
         };
         return new Promise((resolve) => {
           r.setData(newObj, resolve);
@@ -275,30 +281,30 @@ class Store {
   }
 }
 
-const _filterKey = function(obj, useKeys = [], fn) {
+const _filterKey = function (obj, useKeys = [], fn) {
   let result = {};
   Object.keys(obj)
-    .filter(key =>
-      useKeys.some(usekey => {
+    .filter((key) =>
+      useKeys.some((usekey) => {
         return fn(key, usekey);
       })
     )
-    .forEach(key => {
+    .forEach((key) => {
       result[key] = obj[key];
     });
   return result;
 };
 
-const setData = function(obj, data) {
+const setData = function (obj, data) {
   let result = _deepClone(data);
   let origin = _deepClone(obj);
-  Object.keys(origin).forEach(key => {
+  Object.keys(origin).forEach((key) => {
     dataHandler(key, origin[key], result);
   });
   return result;
 };
 
-const dataHandler = function(key, result, data) {
+const dataHandler = function (key, result, data) {
   let arr = pathHandler(key);
   let d = data;
   for (let i = 0; i < arr.length - 1; i++) {
@@ -308,7 +314,7 @@ const dataHandler = function(key, result, data) {
   d[arr[arr.length - 1]] = result;
 };
 
-const pathHandler = function(key) {
+const pathHandler = function (key) {
   let current = "",
     keyArr = [];
   for (let i = 0, len = key.length; i < len; i++) {
@@ -325,14 +331,14 @@ const pathHandler = function(key) {
   return keyArr;
 };
 
-const cleanAndPush = function(key, arr) {
+const cleanAndPush = function (key, arr) {
   let r = cleanKey(key);
   if (r !== "") {
     arr.push(r);
   }
 };
 
-const keyToData = function(prev, current, data) {
+const keyToData = function (prev, current, data) {
   if (prev === "") {
     return;
   }
@@ -344,7 +350,7 @@ const keyToData = function(prev, current, data) {
   }
 };
 
-const cleanKey = function(key) {
+const cleanKey = function (key) {
   if (key.match(/\[\S+\]/g)) {
     let result = key.replace(/\[|\]/g, "");
     if (!Number.isNaN(parseInt(result))) {

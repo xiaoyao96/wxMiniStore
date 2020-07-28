@@ -16,7 +16,7 @@ export default new Store({
       })
     }
   },
-  pageLisener: {
+  pageListener: {
     onLoad(options) {
       console.log('我在' + this.route, '参数为', options);
     },
