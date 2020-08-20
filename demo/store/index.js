@@ -22,6 +22,12 @@ export default new Store({
     },
     onHide() {
       console.log('lalala')
+    },
+    onShareAppMessage(res){
+      return {
+        title: '全局分享',
+        path: '/index/index?id=123'
+      }
     }
   },
   // 开启了局部模式

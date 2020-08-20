@@ -12,34 +12,21 @@
 
 ## 更新日志
 
+### 1.3.1
+
+\[2021.1.13\]  
+`U`：优化pageListener中的onShareAppMessage能力，使其支持自定义[全局分享](#share)。
+
 ### 1.3.0
 
 \[2020.7.28\]  
-`A`：新增 [store.prototype.clearState](#clearState) 清除状态。  
+`A`：新增 [store.prototype.clearState](#clearState) 清除状态，by [@zkl2333](https://github.com/zkl2333)  
 `F`：新增polyfill，修复 [#25](https://github.com/xiaoyao96/wxMiniStore/issues/25)。  
 `F`：单词错误 pageLisener 改为 pageListener（已做向下兼容可放心升级）。  
 
 ### 1.2.9
 
-\[2020.3.31\] `A`: 新增[debug 字段](#other)，用于开启/关闭 setState 时的 console。
-
-### 1.2.8
-
-\[2019.11.27\] `F`: 优化 diff 能力。
-
-### 1.2.7
-
-\[2019.9.6\] `F`: 修复删除 state 中的数组，删除的项会为 null 的问题。
-
-### 1.2.6
-
-\[2019.6.26\] `A`: 新增[store.prototype.getState](#state)，用于读取 store.\$state 的拷贝，防止对原状态进行误操作。
-
-### 1.2.5
-
-\[2019.6.25\] `F`: 修复 setState 为引用类型数据时视图可能不会更新。
-
-完整日志[点击此处查看](https://github.com/xiaoyao96/wxMiniStore/issues/9)
+\[2020.3.31\] `A`: 新增[debug 字段](#other)，用于开启/关闭 setState 时的 console。  
 
 ### 导航
 
@@ -51,6 +38,7 @@
   - [修改状态](#start-5)
   - [修改状态注意事项](#start-6)
 - [页面周期监听](#lisener)
+  - [全局分享](#share)
 - [全局方法](#f)
 - 性能优化
   - [局部状态模式](#part)
@@ -255,7 +243,26 @@ App.Page({
 // 2
 ```
 
-### 2.没有第二步...
+### <div id="share">2.全局分享 `1.3.1+`</div>
+
+现支持全局分享功能，以方便开发者能一次性定义所有页面的分享功能。  
+```js
+// store中
+let store = new Store({
+  //页面监听
+  pageListener: {
+    onShareAppMessage(res){
+      return {
+        title: '全局分享',
+        path: '/index/index'
+      }
+    }
+  },
+});
+```
+store中onShareAppMessage返回值的优先级是`次于`页面级的，所以当Page中有onShareAppMessage且有返回值，则会优先使用Page中的分享。
+
+### 3.没有第二步...
 
 总结：
 

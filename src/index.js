@@ -8,8 +8,7 @@ console.log("当前wxministore版本：" + Version);
 /**
  * Store
  * @author Leisure
- * @update 2020.7.28
- * @version 1.3.0
+ * @update 2021.1.13
  */
 class Store {
   version = Version;
@@ -138,8 +137,10 @@ class Store {
         ) {
           const originLife = o[key];
           o[key] = function () {
-            pageListener[key].apply(this, arguments);
-            originLife && originLife.apply(this, arguments);
+            let listenerValue = pageListener[key].apply(this, arguments);
+            let originValue = originLife && originLife.apply(this, arguments);
+            // 优先使用页面里函数的返回值（修复分享问题）
+            return originValue || listenerValue
           };
         }
       });

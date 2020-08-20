@@ -32,5 +32,11 @@ App.Page({
       finish: true
     })
     wx.navigateBack();
+  },
+  onShareAppMessage() {
+    return {
+      title: '这是详情的分享',
+      path: '/detail/index'
+    }
   }
 })
