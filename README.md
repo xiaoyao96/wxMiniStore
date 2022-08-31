@@ -1,4 +1,4 @@
-# wxMiniStore
+# wxMiniStore 
 
 [![NPM version](https://img.shields.io/npm/v/wxministore.svg)](https://www.npmjs.com/package/wxministore)
 [![License](https://img.shields.io/npm/l/wxministore.svg)](https://www.npmjs.com/package/wxministore)
@@ -11,6 +11,10 @@
 - 适合原生小程序，即使后期引入，也只需增加几行代码。
 
 ## 更新日志
+
+自 2022.8.31 起本人将不再更新维护此库。
+推荐大家使用腾讯开源的 westore 来管理微信原生小程序状态，或直接使用 uniapp、taro 等跨平台开发框架来开发小程序更佳。
+感谢之前使用过此库的开发者，以及提过pr和issue的贡献者。
 
 ### 1.3.1
 
